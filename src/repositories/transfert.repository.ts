@@ -1,0 +1,166 @@
+// ============================================================
+// FICHIER : src/repositories/transfert.repository.ts
+// Rôle : Accès BD pour les transferts inter-agences.
+//        Seul le magasinier de Douala peut initier un transfert.
+//        Seul le PDG peut approuver ou rejeter.
+// ============================================================
+
+import { PrismaClient, StatutTransfert } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+// ── Créer une demande de transfert
+export async function creerTransfert(data: {
+  agenceSourceId: number
+  agenceDestinationId: number
+  fruitId: number
+  calibreId: number
+  quantite: number
+  demandePar: number
+  note?: string
+}) {
+  // Vérifier que le stock source est suffisant
+  const stock = await prisma.stock.findFirst({
+    where: {
+      agenceId: data.agenceSourceId,
+      fruitId: data.fruitId,
+      calibreId: data.calibreId,
+      quantiteCartons: { gte: data.quantite },
+    },
+  })
+
+  if (!stock) {
+    throw new Error('Stock insuffisant pour ce transfert.')
+  }
+
+  return prisma.transfert.create({
+    data: {
+      agenceSourceId: data.agenceSourceId,
+      agenceDestinationId: data.agenceDestinationId,
+      fruitId: data.fruitId,
+      calibreId: data.calibreId,
+      quantite: data.quantite,
+      demandePar: data.demandePar,
+      note: data.note,
+      statut: 'EN_ATTENTE',
+    },
+    include: {
+      agenceSource: { select: { id: true, nom: true } },
+      agenceDestination: { select: { id: true, nom: true } },
+      fruit: { select: { id: true, nom: true } },
+      calibre: { select: { id: true, valeur: true } },
+      demandeur: { select: { id: true, nom: true, role: true } },
+    },
+  })
+}
+
+// ── Lister les transferts
+export async function listerTransferts(params: {
+  statut?: StatutTransfert
+  agenceId?: number
+  skip: number
+  limit: number
+}) {
+  const where: any = {}
+  if (params.statut) where.statut = params.statut
+  if (params.agenceId) {
+    where.OR = [
+      { agenceSourceId: params.agenceId },
+      { agenceDestinationId: params.agenceId },
+    ]
+  }
+
+  const [transferts, total] = await Promise.all([
+    prisma.transfert.findMany({
+      where,
+      skip: params.skip,
+      take: params.limit,
+      include: {
+        agenceSource: { select: { id: true, nom: true } },
+        agenceDestination: { select: { id: true, nom: true } },
+        fruit: { select: { id: true, nom: true } },
+        calibre: { select: { id: true, valeur: true } },
+        demandeur: { select: { id: true, nom: true } },
+        validateur: { select: { id: true, nom: true } },
+      },
+      orderBy: { dateDemande: 'desc' },
+    }),
+    prisma.transfert.count({ where }),
+  ])
+
+  return { transferts, total }
+}
+
+// ── Approuver un transfert (PDG uniquement) — transaction atomique
+export async function approuverTransfert(id: number, validePar: number) {
+  return prisma.$transaction(async (tx) => {
+    const transfert = await tx.transfert.findUnique({ where: { id } })
+    if (!transfert) throw new Error('Transfert introuvable.')
+    if (transfert.statut !== 'EN_ATTENTE') {
+      throw new Error('Ce transfert a déjà été traité.')
+    }
+
+    // Vérifier le stock source
+    const stockSource = await tx.stock.findFirst({
+      where: {
+        agenceId: transfert.agenceSourceId,
+        fruitId: transfert.fruitId,
+        calibreId: transfert.calibreId,
+        quantiteCartons: { gte: transfert.quantite },
+      },
+    })
+
+    if (!stockSource) throw new Error('Stock source insuffisant.')
+
+    // Déduire du stock source
+    await tx.stock.update({
+      where: { id: stockSource.id },
+      data: { quantiteCartons: { decrement: transfert.quantite } },
+    })
+
+    // Ajouter au stock destination
+    await tx.stock.upsert({
+      where: {
+        agenceId_fruitId_calibreId_origine_categorie: {
+          agenceId: transfert.agenceDestinationId,
+          fruitId: transfert.fruitId,
+          calibreId: transfert.calibreId,
+          origine: stockSource.origine,
+          categorie: stockSource.categorie,
+        },
+      },
+      update: { quantiteCartons: { increment: transfert.quantite } },
+      create: {
+        agenceId: transfert.agenceDestinationId,
+        fruitId: transfert.fruitId,
+        calibreId: transfert.calibreId,
+        origine: stockSource.origine,
+        categorie: stockSource.categorie,
+        quantiteCartons: transfert.quantite,
+        prixUnitaire: stockSource.prixUnitaire,
+      },
+    })
+
+    // Marquer le transfert comme approuvé
+    return tx.transfert.update({
+      where: { id },
+      data: {
+        statut: 'APPROUVE',
+        validePar,
+        dateValidation: new Date(),
+      },
+    })
+  })
+}
+
+// ── Rejeter un transfert
+export async function rejeterTransfert(id: number, validePar: number) {
+  const transfert = await prisma.transfert.findUnique({ where: { id } })
+  if (!transfert) throw new Error('Transfert introuvable.')
+  if (transfert.statut !== 'EN_ATTENTE') throw new Error('Ce transfert a déjà été traité.')
+
+  return prisma.transfert.update({
+    where: { id },
+    data: { statut: 'REJETE', validePar, dateValidation: new Date() },
+  })
+}
