@@ -40,7 +40,7 @@ export async function creerCompteEmploye(
   creePar: number
 ) {
   // 1. Vérifie que le rôle est un rôle d'employé
-  if (!ROLES_EMPLOYES.includes(data.role)) {
+  if (!ROLES_EMPLOYES.includes(data.role as any)) {
     throw new Error('Rôle invalide. Seuls SECRETAIRE, MAGASINIER et LIVREUR sont autorisés.')
   }
 

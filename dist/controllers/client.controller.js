@@ -4,6 +4,10 @@ exports.listerClients = listerClients;
 exports.detailClient = detailClient;
 exports.modifierLimiteCredit = modifierLimiteCredit;
 exports.ajouterPaiement = ajouterPaiement;
+exports.fixerEcheance = fixerEcheance;
+exports.ajouterVersement = ajouterVersement;
+exports.historiqueVersements = historiqueVersements;
+exports.lancerJobInterets = lancerJobInterets;
 const zod_1 = require("zod");
 const client_service_1 = require("../services/client.service");
 const response_1 = require("../utils/response");
@@ -51,6 +55,52 @@ async function ajouterPaiement(req, res) {
         if (e.name === 'ZodError')
             return (0, response_1.repondreErreur)(res, 'Donnees invalides.', 400, e.errors);
         return (0, response_1.repondreErreur)(res, e.message, 400);
+    }
+}
+const client_service_2 = require("../services/client.service");
+async function fixerEcheance(req, res) {
+    try {
+        const { dateEcheance, tauxInteretMensuel } = zod_1.z.object({
+            dateEcheance: zod_1.z.string(),
+            tauxInteretMensuel: zod_1.z.number().min(0),
+        }).parse(req.body);
+        const client = await (0, client_service_2.definirEcheanceEtTaux)(parseInt(req.params.id), new Date(dateEcheance), tauxInteretMensuel);
+        return (0, response_1.repondreSucces)(res, client, 'Echeance et taux fixes.');
+    }
+    catch (e) {
+        if (e.name === 'ZodError')
+            return (0, response_1.repondreErreur)(res, 'Donnees invalides.', 400, e.errors);
+        return (0, response_1.repondreErreur)(res, e.message, 400);
+    }
+}
+async function ajouterVersement(req, res) {
+    try {
+        const { montant } = zod_1.z.object({ montant: zod_1.z.number().positive() }).parse(req.body);
+        const versement = await (0, client_service_2.faireVersement)({ clientId: parseInt(req.params.id), montant, enregistreParId: req.user.id });
+        return (0, response_1.repondreSucces)(res, versement, 'Versement enregistre.', 201);
+    }
+    catch (e) {
+        if (e.name === 'ZodError')
+            return (0, response_1.repondreErreur)(res, 'Donnees invalides.', 400, e.errors);
+        return (0, response_1.repondreErreur)(res, e.message, 400);
+    }
+}
+async function historiqueVersements(req, res) {
+    try {
+        const versements = await (0, client_service_2.obtenirHistoriqueVersements)(parseInt(req.params.id));
+        return (0, response_1.repondreSucces)(res, versements);
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
+}
+async function lancerJobInterets(req, res) {
+    try {
+        const resultats = await (0, client_service_2.executerJobInterets)();
+        return (0, response_1.repondreSucces)(res, resultats, 'Interets appliques.');
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
     }
 }
 //# sourceMappingURL=client.controller.js.map

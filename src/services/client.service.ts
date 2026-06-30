@@ -18,3 +18,23 @@ export async function enregistrerPaiement(data: { clientId: number; commandeId?:
   if (data.montant <= 0) throw new Error('Le montant doit etre positif.')
   return enregistrerPaiementCredit(data)
 }
+
+import { fixerEcheanceEtTaux, enregistrerVersementCredit, listerVersementsClient, appliquerInteretsRetard } from '../repositories/client.repository'
+
+export async function definirEcheanceEtTaux(clientId: number, dateEcheance: Date, tauxInteretMensuel: number) {
+  if (tauxInteretMensuel < 0) throw new Error('Le taux d\'interet ne peut pas etre negatif.')
+  return fixerEcheanceEtTaux(clientId, dateEcheance, tauxInteretMensuel)
+}
+
+export async function faireVersement(data: { clientId: number; montant: number; enregistreParId: number }) {
+  if (data.montant <= 0) throw new Error('Le montant doit etre positif.')
+  return enregistrerVersementCredit(data)
+}
+
+export async function obtenirHistoriqueVersements(clientId: number) {
+  return listerVersementsClient(clientId)
+}
+
+export async function executerJobInterets() {
+  return appliquerInteretsRetard()
+}

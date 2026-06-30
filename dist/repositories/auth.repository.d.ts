@@ -38,6 +38,8 @@ export declare function trouverClientParIdentifiant(identifiant: string): Promis
     limiteCredit: import("@prisma/client/runtime/library").Decimal;
     creditUtilise: import("@prisma/client/runtime/library").Decimal;
     statutCredit: import(".prisma/client").$Enums.StatutCredit;
+    dateEcheance: Date | null;
+    tauxInteretMensuel: import("@prisma/client/runtime/library").Decimal;
 }>;
 export declare function creerClient(data: {
     nom: string;
@@ -68,6 +70,8 @@ export declare function creerClient(data: {
     limiteCredit: import("@prisma/client/runtime/library").Decimal;
     creditUtilise: import("@prisma/client/runtime/library").Decimal;
     statutCredit: import(".prisma/client").$Enums.StatutCredit;
+    dateEcheance: Date | null;
+    tauxInteretMensuel: import("@prisma/client/runtime/library").Decimal;
 }>;
 export declare function telephoneExiste(telephone: string): Promise<boolean>;
 export declare function emailExiste(email: string): Promise<boolean>;

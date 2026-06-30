@@ -59,6 +59,8 @@ export declare function trouverClientParId(id: number): Promise<{
     limiteCredit: import("@prisma/client/runtime/library").Decimal;
     creditUtilise: import("@prisma/client/runtime/library").Decimal;
     statutCredit: import(".prisma/client").$Enums.StatutCredit;
+    dateEcheance: Date | null;
+    tauxInteretMensuel: import("@prisma/client/runtime/library").Decimal;
 }>;
 export declare function modifierLimiteCredit(clientId: number, limiteCredit: number, modifiePar: number): Promise<{
     id: number;
@@ -75,6 +77,8 @@ export declare function modifierLimiteCredit(clientId: number, limiteCredit: num
     limiteCredit: import("@prisma/client/runtime/library").Decimal;
     creditUtilise: import("@prisma/client/runtime/library").Decimal;
     statutCredit: import(".prisma/client").$Enums.StatutCredit;
+    dateEcheance: Date | null;
+    tauxInteretMensuel: import("@prisma/client/runtime/library").Decimal;
 }>;
 export declare function enregistrerPaiementCredit(data: {
     clientId: number;
@@ -89,4 +93,50 @@ export declare function enregistrerPaiementCredit(data: {
     montant: import("@prisma/client/runtime/library").Decimal;
     enregistrePar: number;
 }>;
+export declare function fixerEcheanceEtTaux(clientId: number, dateEcheance: Date, tauxInteretMensuel: number): Promise<{
+    id: number;
+    nom: string;
+    telephone: string;
+    email: string | null;
+    motDePasseHash: string;
+    agenceId: number;
+    actif: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    adresse: string | null;
+    type: import(".prisma/client").$Enums.TypeClient;
+    limiteCredit: import("@prisma/client/runtime/library").Decimal;
+    creditUtilise: import("@prisma/client/runtime/library").Decimal;
+    statutCredit: import(".prisma/client").$Enums.StatutCredit;
+    dateEcheance: Date | null;
+    tauxInteretMensuel: import("@prisma/client/runtime/library").Decimal;
+}>;
+export declare function enregistrerVersementCredit(data: {
+    clientId: number;
+    montant: number;
+    enregistreParId: number;
+}): Promise<{
+    id: number;
+    date: Date;
+    clientId: number;
+    montant: import("@prisma/client/runtime/library").Decimal;
+    soldeAvant: import("@prisma/client/runtime/library").Decimal;
+    soldeApres: import("@prisma/client/runtime/library").Decimal;
+    enregistreParId: number;
+}>;
+export declare function listerVersementsClient(clientId: number): Promise<({
+    enregistrePar: {
+        id: number;
+        nom: string;
+    };
+} & {
+    id: number;
+    date: Date;
+    clientId: number;
+    montant: import("@prisma/client/runtime/library").Decimal;
+    soldeAvant: import("@prisma/client/runtime/library").Decimal;
+    soldeApres: import("@prisma/client/runtime/library").Decimal;
+    enregistreParId: number;
+})[]>;
+export declare function appliquerInteretsRetard(): Promise<any[]>;
 //# sourceMappingURL=client.repository.d.ts.map

@@ -20,6 +20,8 @@ export declare function assignerLivraison(data: {
             limiteCredit: import("@prisma/client/runtime/library").Decimal;
             creditUtilise: import("@prisma/client/runtime/library").Decimal;
             statutCredit: import(".prisma/client").$Enums.StatutCredit;
+            dateEcheance: Date | null;
+            tauxInteretMensuel: import("@prisma/client/runtime/library").Decimal;
         };
     } & {
         id: number;

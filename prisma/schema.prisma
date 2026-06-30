@@ -168,6 +168,7 @@ model User {
   receptionsCreees  ReceptionMarchandise[]
   pertesDeclarees   Perte[]
   paiementsEnregistres PaiementCredit[]
+  versementsEnregistres VersementCredit[]
   notifications     Notification[]
   logsActions       LogAction[]
 
@@ -319,6 +320,8 @@ model Client {
   limiteCredit  Decimal      @default(0) @map("limite_credit") @db.Decimal(10, 2)
   creditUtilise Decimal      @default(0) @map("credit_utilise") @db.Decimal(10, 2)
   statutCredit  StatutCredit @default(EN_REGLE) @map("statut_credit")
+  dateEcheance  DateTime?    @map("date_echeance")
+  tauxInteretMensuel Decimal @default(0) @map("taux_interet_mensuel") @db.Decimal(5, 2)
   actif         Boolean      @default(true)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -327,6 +330,7 @@ model Client {
   agence         Agence           @relation(fields: [agenceId], references: [id])
   commandes      Commande[]
   paiementsCredit PaiementCredit[]
+  versementsCredit VersementCredit[]
   notifications  NotificationClient[]
 
   @@index([agenceId])
@@ -520,4 +524,39 @@ model LogAction {
   @@index([userId])
   @@index([createdAt])
   @@map("logs_actions")
+}
+
+// ============================================================
+// TABLE : versements_credit
+// Trace chaque versement d'un client avec le solde avant/après
+// Permet au client de voir sa progression de remboursement
+// ============================================================
+model VersementCredit {
+  id              Int      @id @default(autoincrement())
+  clientId        Int      @map("client_id")
+  montant         Decimal  @db.Decimal(10, 2)
+  soldeAvant      Decimal  @map("solde_avant") @db.Decimal(10, 2)
+  soldeApres      Decimal  @map("solde_apres") @db.Decimal(10, 2)
+  enregistreParId Int      @map("enregistre_par_id")
+  date            DateTime @default(now())
+
+  client       Client @relation(fields: [clientId], references: [id])
+  enregistrePar User  @relation(fields: [enregistreParId], references: [id])
+
+  @@index([clientId])
+  @@index([date])
+  @@map("versements_credit")
+}
+
+// ============================================================
+// TABLE : parametres_systeme
+// Paramètres globaux configurables par le PDG
+// Ex: taux d'intérêt par défaut sur les crédits en retard
+// ============================================================
+model ParametreSysteme {
+  id    Int    @id @default(autoincrement())
+  cle   String @unique @db.VarChar(100)
+  valeur String @db.VarChar(255)
+
+  @@map("parametres_systeme")
 }

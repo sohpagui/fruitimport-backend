@@ -42,3 +42,44 @@ export async function ajouterPaiement(req: Request, res: Response) {
     return repondreErreur(res, e.message, 400)
   }
 }
+
+import { definirEcheanceEtTaux, faireVersement, obtenirHistoriqueVersements, executerJobInterets } from '../services/client.service'
+
+export async function fixerEcheance(req: Request, res: Response) {
+  try {
+    const { dateEcheance, tauxInteretMensuel } = z.object({
+      dateEcheance: z.string(),
+      tauxInteretMensuel: z.number().min(0),
+    }).parse(req.body)
+    const client = await definirEcheanceEtTaux(parseInt(req.params.id), new Date(dateEcheance), tauxInteretMensuel)
+    return repondreSucces(res, client, 'Echeance et taux fixes.')
+  } catch (e: any) {
+    if (e.name === 'ZodError') return repondreErreur(res, 'Donnees invalides.', 400, e.errors)
+    return repondreErreur(res, e.message, 400)
+  }
+}
+
+export async function ajouterVersement(req: Request, res: Response) {
+  try {
+    const { montant } = z.object({ montant: z.number().positive() }).parse(req.body)
+    const versement = await faireVersement({ clientId: parseInt(req.params.id), montant, enregistreParId: req.user!.id })
+    return repondreSucces(res, versement, 'Versement enregistre.', 201)
+  } catch (e: any) {
+    if (e.name === 'ZodError') return repondreErreur(res, 'Donnees invalides.', 400, e.errors)
+    return repondreErreur(res, e.message, 400)
+  }
+}
+
+export async function historiqueVersements(req: Request, res: Response) {
+  try {
+    const versements = await obtenirHistoriqueVersements(parseInt(req.params.id))
+    return repondreSucces(res, versements)
+  } catch (e: any) { return repondreErreur(res, e.message, 500) }
+}
+
+export async function lancerJobInterets(req: Request, res: Response) {
+  try {
+    const resultats = await executerJobInterets()
+    return repondreSucces(res, resultats, 'Interets appliques.')
+  } catch (e: any) { return repondreErreur(res, e.message, 500) }
+}

@@ -36,7 +36,7 @@ const schemaMettreAJour = z.object({
 // POST /admin/users — Créer un employé (PDG uniquement)
 export async function creerUser(req: Request, res: Response) {
   try {
-    const data = schemaCreerUser.parse(req.body)
+    const data: any = schemaCreerUser.parse(req.body)
     const user = await creerCompteEmploye(
       { ...data, role: data.role as Role },
       req.user!.id

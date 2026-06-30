@@ -66,7 +66,7 @@ export async function logout(req: Request, res: Response) {
 // POST /auth/register-client
 export async function registerClient(req: Request, res: Response) {
   try {
-    const data = schemaInscriptionClient.parse(req.body)
+    const data: any = schemaInscriptionClient.parse(req.body)
     const client = await inscrireClient(data)
     return repondreSucces(res, client, 'Compte client créé avec succès.', 201)
   } catch (error: any) {

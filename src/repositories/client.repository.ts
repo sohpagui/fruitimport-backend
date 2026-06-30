@@ -143,3 +143,99 @@ async function recalculerStatutCredit(clientId: number) {
     data: { statutCredit: nouveauStatut },
   })
 }
+
+// ── Fixer la date d'échéance et le taux d'intérêt d'un client (PDG uniquement)
+export async function fixerEcheanceEtTaux(
+  clientId: number,
+  dateEcheance: Date,
+  tauxInteretMensuel: number
+) {
+  return prisma.client.update({
+    where: { id: clientId },
+    data: { dateEcheance, tauxInteretMensuel },
+  })
+}
+
+// ── Enregistrer un versement de crédit (avec historique avant/apres)
+export async function enregistrerVersementCredit(data: {
+  clientId: number
+  montant: number
+  enregistreParId: number
+}) {
+  return prisma.$transaction(async (tx) => {
+    const client = await tx.client.findUnique({ where: { id: data.clientId } })
+    if (!client) throw new Error('Client introuvable.')
+
+    const soldeAvant = Number(client.creditUtilise)
+    const montantReel = Math.min(data.montant, soldeAvant)
+    const soldeApres = soldeAvant - montantReel
+
+    const versement = await tx.versementCredit.create({
+      data: {
+        clientId: data.clientId,
+        montant: montantReel,
+        soldeAvant,
+        soldeApres,
+        enregistreParId: data.enregistreParId,
+      },
+    })
+
+    const updateData: any = { creditUtilise: soldeApres }
+    if (soldeApres <= 0) {
+      updateData.dateEcheance = null
+      updateData.statutCredit = 'EN_REGLE'
+    }
+
+    await tx.client.update({
+      where: { id: data.clientId },
+      data: updateData,
+    })
+
+    return versement
+  })
+}
+
+// ── Historique des versements d'un client
+export async function listerVersementsClient(clientId: number) {
+  return prisma.versementCredit.findMany({
+    where: { clientId },
+    orderBy: { date: 'desc' },
+    include: {
+      enregistrePar: { select: { id: true, nom: true } },
+    },
+  })
+}
+
+// ── Applique les intérêts de retard sur tous les clients en échéance dépassée
+export async function appliquerInteretsRetard() {
+  const maintenant = new Date()
+  const clientsEnRetard = await prisma.client.findMany({
+    where: {
+      dateEcheance: { lt: maintenant },
+      creditUtilise: { gt: 0 },
+    },
+  })
+
+  const resultats = []
+  for (const client of clientsEnRetard) {
+    const taux = Number(client.tauxInteretMensuel)
+    if (taux <= 0) continue
+
+    const soldeAvant = Number(client.creditUtilise)
+    const interet = soldeAvant * (taux / 100)
+    const soldeApres = soldeAvant + interet
+
+    await prisma.client.update({
+      where: { id: client.id },
+      data: {
+        creditUtilise: soldeApres,
+        statutCredit: 'EN_RETARD',
+        dateEcheance: new Date(client.dateEcheance!.getTime() + 30 * 24 * 60 * 60 * 1000),
+      },
+    })
+
+    resultats.push({ clientId: client.id, nom: client.nom, interetApplique: interet, nouveauSolde: soldeApres })
+  }
+
+  return resultats
+}
