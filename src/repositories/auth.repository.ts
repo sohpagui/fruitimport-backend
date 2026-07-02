@@ -8,9 +8,9 @@
 // Route → Controller → Service → Repository → Prisma → MySQL
 // ============================================================
 
-import { PrismaClient } from '@prisma/client'
+import { } from '@prisma/client'
+import prisma from '../lib/prisma'
 
-const prisma = new PrismaClient()
 
 // Trouve un employé par téléphone ou email
 export async function trouverUserParIdentifiant(identifiant: string) {

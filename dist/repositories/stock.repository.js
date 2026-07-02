@@ -3,6 +3,9 @@
 // FICHIER : src/repositories/stock.repository.ts
 // Rôle : Accès BD pour tout ce qui concerne le stock.
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listerStocks = listerStocks;
 exports.obtenirAlertesStock = obtenirAlertesStock;
@@ -10,8 +13,7 @@ exports.receptionnerMarchandise = receptionnerMarchandise;
 exports.declarerPerte = declarerPerte;
 exports.obtenirCatalogue = obtenirCatalogue;
 exports.deduireStock = deduireStock;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 // ── Lister les stocks avec filtres
 async function listerStocks(params) {
     const where = {};
@@ -24,7 +26,7 @@ async function listerStocks(params) {
     if (params.categorie)
         where.categorie = params.categorie;
     const [stocks, total] = await Promise.all([
-        prisma.stock.findMany({
+        prisma_1.default.stock.findMany({
             where,
             skip: params.skip,
             take: params.limit,
@@ -35,7 +37,7 @@ async function listerStocks(params) {
             },
             orderBy: [{ fruit: { nom: 'asc' } }, { calibre: { ordreAffichage: 'asc' } }],
         }),
-        prisma.stock.count({ where }),
+        prisma_1.default.stock.count({ where }),
     ]);
     return { stocks, total };
 }
@@ -44,7 +46,7 @@ async function obtenirAlertesStock(agenceId) {
     const where = { quantiteCartons: { lte: 5 } };
     if (agenceId)
         where.agenceId = agenceId;
-    return prisma.stock.findMany({
+    return prisma_1.default.stock.findMany({
         where,
         include: {
             agence: { select: { id: true, nom: true } },
@@ -58,7 +60,7 @@ async function obtenirAlertesStock(agenceId) {
 // Une transaction atomique = tout réussit ou tout échoue
 // Pas de risque d'avoir le stock mis à jour sans la réception enregistrée
 async function receptionnerMarchandise(data) {
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         // 1. Enregistrer la réception
         const reception = await tx.receptionMarchandise.create({
             data: {
@@ -134,7 +136,7 @@ async function receptionnerMarchandise(data) {
 }
 // ── Déclarer une perte (transaction atomique)
 async function declarerPerte(data) {
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         // 1. Vérifier le stock disponible
         const stock = await tx.stock.findUnique({
             where: {
@@ -184,7 +186,7 @@ async function declarerPerte(data) {
 }
 // ── Catalogue public (pour les clients)
 async function obtenirCatalogue(agenceId) {
-    return prisma.stock.findMany({
+    return prisma_1.default.stock.findMany({
         where: {
             agenceId,
             quantiteCartons: { gt: 0 },

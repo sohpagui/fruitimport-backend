@@ -3,10 +3,10 @@
 // Rôle : Accès BD pour les commandes.
 // ============================================================
 
-import { PrismaClient, StatutCommande, ModePaiement } from '@prisma/client'
+import { StatutCommande, ModePaiement } from '@prisma/client'
+import prisma from '../lib/prisma'
 import { deduireStock } from './stock.repository'
 
-const prisma = new PrismaClient()
 
 // Génère un numéro de commande unique : BC-2026-000001
 async function genererNumeroCommande(): Promise<string> {

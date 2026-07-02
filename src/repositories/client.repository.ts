@@ -3,9 +3,9 @@
 // Rôle : Accès BD pour les clients et leurs crédits.
 // ============================================================
 
-import { PrismaClient, StatutCredit } from '@prisma/client'
+import { StatutCredit } from '@prisma/client'
+import prisma from '../lib/prisma'
 
-const prisma = new PrismaClient()
 
 // ── Lister les clients
 export async function listerClients(params: {

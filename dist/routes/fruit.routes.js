@@ -1,15 +1,17 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const client_1 = require("@prisma/client");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const auth_middleware_1 = require("../middlewares/auth.middleware");
 const response_1 = require("../utils/response");
 const router = (0, express_1.Router)();
-const prisma = new client_1.PrismaClient();
 // GET /fruits — Liste tous les fruits avec leurs calibres
 router.get('/', auth_middleware_1.authentifier, async (req, res) => {
     try {
-        const fruits = await prisma.fruit.findMany({
+        const fruits = await prisma_1.default.fruit.findMany({
             include: { calibres: { orderBy: { ordreAffichage: 'asc' } } },
             orderBy: { nom: 'asc' },
         });

@@ -3,16 +3,18 @@
 // FICHIER : src/repositories/livraison.repository.ts
 // Rôle : Accès BD pour les livraisons.
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.creerLivraison = creerLivraison;
 exports.listerLivraisons = listerLivraisons;
 exports.mettreAJourStatutLivraison = mettreAJourStatutLivraison;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 // ── Créer une livraison
 async function creerLivraison(data) {
     // Vérifier que la commande est dans l'état PREPAREE
-    const commande = await prisma.commande.findUnique({
+    const commande = await prisma_1.default.commande.findUnique({
         where: { id: data.commandeId },
     });
     if (!commande)
@@ -20,7 +22,7 @@ async function creerLivraison(data) {
     if (commande.statut !== 'PREPAREE') {
         throw new Error('La commande doit être dans l\'état PREPAREE pour être livrée.');
     }
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         const livraison = await tx.livraison.create({
             data: {
                 commandeId: data.commandeId,
@@ -50,7 +52,7 @@ async function listerLivraisons(params) {
     if (params.agenceId)
         where.commande = { agenceId: params.agenceId };
     const [livraisons, total] = await Promise.all([
-        prisma.livraison.findMany({
+        prisma_1.default.livraison.findMany({
             where,
             skip: params.skip,
             take: params.limit,
@@ -65,13 +67,13 @@ async function listerLivraisons(params) {
             },
             orderBy: { dateAssignation: 'desc' },
         }),
-        prisma.livraison.count({ where }),
+        prisma_1.default.livraison.count({ where }),
     ]);
     return { livraisons, total };
 }
 // ── Mettre à jour le statut d'une livraison
 async function mettreAJourStatutLivraison(id, statut, noteProbleme) {
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         const livraison = await tx.livraison.update({
             where: { id },
             data: {

@@ -1,15 +1,17 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const client_1 = require("@prisma/client");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const auth_middleware_1 = require("../middlewares/auth.middleware");
 const response_1 = require("../utils/response");
 const router = (0, express_1.Router)();
-const prisma = new client_1.PrismaClient();
 // GET /agences — Liste des agences
 router.get('/', auth_middleware_1.authentifier, async (req, res) => {
     try {
-        const agences = await prisma.agence.findMany();
+        const agences = await prisma_1.default.agence.findMany();
         return (0, response_1.repondreSucces)(res, agences);
     }
     catch (e) {
@@ -19,7 +21,7 @@ router.get('/', auth_middleware_1.authentifier, async (req, res) => {
 // GET /agences/:id — Détail d'une agence
 router.get('/:id', auth_middleware_1.authentifier, async (req, res) => {
     try {
-        const agence = await prisma.agence.findUnique({
+        const agence = await prisma_1.default.agence.findUnique({
             where: { id: parseInt(req.params.id) },
         });
         if (!agence)

@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { } from '@prisma/client'
+import prisma from '../lib/prisma'
 import { authentifier } from '../middlewares/auth.middleware'
 import { repondreSucces, repondreErreur } from '../utils/response'
 
 const router = Router()
-const prisma = new PrismaClient()
 
 // GET /fruits — Liste tous les fruits avec leurs calibres
 router.get('/', authentifier, async (req, res) => {

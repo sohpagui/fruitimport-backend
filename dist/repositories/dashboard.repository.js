@@ -5,14 +5,16 @@
 //        Ces requêtes agrègent les données des deux agences
 //        pour donner une vue globale à la direction.
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.statsGlobales = statsGlobales;
 exports.ventesSetDernierJours = ventesSetDernierJours;
 exports.ventesParFruit = ventesParFruit;
 exports.statsParAgence = statsParAgence;
 exports.genererSynthese = genererSynthese;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 // ── Stats globales du jour pour les deux agences
 async function statsGlobales() {
     const aujourd_hui = new Date();
@@ -20,7 +22,7 @@ async function statsGlobales() {
     const demain = new Date(aujourd_hui);
     demain.setDate(demain.getDate() + 1);
     // Ventes du jour (commandes livrées ou confirmées aujourd'hui)
-    const ventesJour = await prisma.commande.aggregate({
+    const ventesJour = await prisma_1.default.commande.aggregate({
         where: {
             date: { gte: aujourd_hui, lt: demain },
             statut: { in: ['CONFIRMEE', 'PREPAREE', 'EN_LIVRAISON', 'LIVREE'] },
@@ -29,7 +31,7 @@ async function statsGlobales() {
         _count: { id: true },
     });
     // Ventes par agence aujourd'hui
-    const ventesParAgence = await prisma.commande.groupBy({
+    const ventesParAgence = await prisma_1.default.commande.groupBy({
         by: ['agenceId'],
         where: {
             date: { gte: aujourd_hui, lt: demain },
@@ -39,37 +41,37 @@ async function statsGlobales() {
         _count: { id: true },
     });
     // Stock total par agence
-    const stockParAgence = await prisma.stock.groupBy({
+    const stockParAgence = await prisma_1.default.stock.groupBy({
         by: ['agenceId'],
         _sum: { quantiteCartons: true },
     });
     // Pertes du jour
-    const pertesJour = await prisma.perte.aggregate({
+    const pertesJour = await prisma_1.default.perte.aggregate({
         where: { date: { gte: aujourd_hui, lt: demain } },
         _sum: { valeurPerdue: true, quantite: true },
     });
     // Créances totales (crédits utilisés non remboursés)
-    const creances = await prisma.client.aggregate({
+    const creances = await prisma_1.default.client.aggregate({
         _sum: { creditUtilise: true },
     });
     // Clients en retard
-    const clientsEnRetard = await prisma.client.count({
+    const clientsEnRetard = await prisma_1.default.client.count({
         where: { statutCredit: 'EN_RETARD' },
     });
     // Clients à relancer
-    const clientsARelancer = await prisma.client.count({
+    const clientsARelancer = await prisma_1.default.client.count({
         where: { statutCredit: 'A_RELANCER' },
     });
     // Transferts en attente
-    const transfertsEnAttente = await prisma.transfert.count({
+    const transfertsEnAttente = await prisma_1.default.transfert.count({
         where: { statut: 'EN_ATTENTE' },
     });
     // Commandes en attente de validation
-    const commandesEnAttente = await prisma.commande.count({
+    const commandesEnAttente = await prisma_1.default.commande.count({
         where: { statut: 'EN_ATTENTE' },
     });
     // Alertes stock bas (moins de 5 cartons)
-    const alertesStock = await prisma.stock.count({
+    const alertesStock = await prisma_1.default.stock.count({
         where: { quantiteCartons: { lte: 5 } },
     });
     return {
@@ -98,7 +100,7 @@ async function ventesSetDernierJours() {
     const il_y_a_7_jours = new Date();
     il_y_a_7_jours.setDate(il_y_a_7_jours.getDate() - 7);
     il_y_a_7_jours.setHours(0, 0, 0, 0);
-    const ventes = await prisma.commande.findMany({
+    const ventes = await prisma_1.default.commande.findMany({
         where: {
             date: { gte: il_y_a_7_jours },
             statut: { in: ['CONFIRMEE', 'PREPAREE', 'EN_LIVRAISON', 'LIVREE'] },
@@ -131,7 +133,7 @@ async function ventesParFruit(agenceId) {
     };
     if (agenceId)
         where.commande.agenceId = agenceId;
-    const lignes = await prisma.ligneCommande.groupBy({
+    const lignes = await prisma_1.default.ligneCommande.groupBy({
         by: ['fruitId'],
         where,
         _sum: { sousTotal: true, quantite: true },
@@ -140,7 +142,7 @@ async function ventesParFruit(agenceId) {
     });
     // Récupérer les noms des fruits
     const fruitsIds = lignes.map(l => l.fruitId);
-    const fruits = await prisma.fruit.findMany({
+    const fruits = await prisma_1.default.fruit.findMany({
         where: { id: { in: fruitsIds } },
         select: { id: true, nom: true },
     });
@@ -158,7 +160,7 @@ async function statsParAgence(agenceId) {
     demain.setDate(demain.getDate() + 1);
     const [ventesJour, stockTotal, nbClients, nbEmployes, pertesMois] = await Promise.all([
         // Ventes du jour
-        prisma.commande.aggregate({
+        prisma_1.default.commande.aggregate({
             where: {
                 agenceId,
                 date: { gte: aujourd_hui, lt: demain },
@@ -168,16 +170,16 @@ async function statsParAgence(agenceId) {
             _count: { id: true },
         }),
         // Stock total
-        prisma.stock.aggregate({
+        prisma_1.default.stock.aggregate({
             where: { agenceId },
             _sum: { quantiteCartons: true },
         }),
         // Nombre de clients
-        prisma.client.count({ where: { agenceId, actif: true } }),
+        prisma_1.default.client.count({ where: { agenceId, actif: true } }),
         // Nombre d'employés actifs
-        prisma.user.count({ where: { agenceId, actif: true } }),
+        prisma_1.default.user.count({ where: { agenceId, actif: true } }),
         // Pertes du mois
-        prisma.perte.aggregate({
+        prisma_1.default.perte.aggregate({
             where: {
                 agenceId,
                 date: {
@@ -190,7 +192,7 @@ async function statsParAgence(agenceId) {
     // Top fruits vendus dans cette agence
     const topFruits = await ventesParFruit(agenceId);
     // Livraisons en cours
-    const livraisonsEnCours = await prisma.livraison.count({
+    const livraisonsEnCours = await prisma_1.default.livraison.count({
         where: {
             statut: { in: ['PREPARE', 'EN_ROUTE'] },
             commande: { agenceId },
@@ -215,7 +217,7 @@ async function genererSynthese(agenceId1, agenceId2) {
     const [stats1, stats2, alertes] = await Promise.all([
         statsParAgence(agenceId1),
         statsParAgence(agenceId2),
-        prisma.stock.findMany({
+        prisma_1.default.stock.findMany({
             where: { quantiteCartons: { lte: 5 } },
             include: {
                 fruit: { select: { nom: true } },

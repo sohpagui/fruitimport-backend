@@ -3,9 +3,9 @@
 // Rôle : Accès BD pour la gestion des utilisateurs (employés).
 // ============================================================
 
-import { PrismaClient, Role } from '@prisma/client'
+import { Role } from '@prisma/client'
+import prisma from '../lib/prisma'
 
-const prisma = new PrismaClient()
 
 // Liste tous les employés (avec filtres optionnels)
 export async function listerUsers(params: {

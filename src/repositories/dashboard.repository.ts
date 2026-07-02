@@ -5,9 +5,9 @@
 //        pour donner une vue globale à la direction.
 // ============================================================
 
-import { PrismaClient } from '@prisma/client'
+import { } from '@prisma/client'
+import prisma from '../lib/prisma'
 
-const prisma = new PrismaClient()
 
 // ── Stats globales du jour pour les deux agences
 export async function statsGlobales() {

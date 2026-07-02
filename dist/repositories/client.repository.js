@@ -3,6 +3,9 @@
 // FICHIER : src/repositories/client.repository.ts
 // Rôle : Accès BD pour les clients et leurs crédits.
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listerClients = listerClients;
 exports.trouverClientParId = trouverClientParId;
@@ -12,8 +15,7 @@ exports.fixerEcheanceEtTaux = fixerEcheanceEtTaux;
 exports.enregistrerVersementCredit = enregistrerVersementCredit;
 exports.listerVersementsClient = listerVersementsClient;
 exports.appliquerInteretsRetard = appliquerInteretsRetard;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 // ── Lister les clients
 async function listerClients(params) {
     const where = { actif: true };
@@ -22,7 +24,7 @@ async function listerClients(params) {
     if (params.statutCredit)
         where.statutCredit = params.statutCredit;
     const [clients, total] = await Promise.all([
-        prisma.client.findMany({
+        prisma_1.default.client.findMany({
             where,
             skip: params.skip,
             take: params.limit,
@@ -41,13 +43,13 @@ async function listerClients(params) {
             },
             orderBy: { nom: 'asc' },
         }),
-        prisma.client.count({ where }),
+        prisma_1.default.client.count({ where }),
     ]);
     return { clients, total };
 }
 // ── Trouver un client par ID
 async function trouverClientParId(id) {
-    return prisma.client.findUnique({
+    return prisma_1.default.client.findUnique({
         where: { id },
         include: {
             agence: { select: { id: true, nom: true } },
@@ -68,7 +70,7 @@ async function trouverClientParId(id) {
 }
 // ── Modifier la limite de crédit (PDG uniquement)
 async function modifierLimiteCredit(clientId, limiteCredit, modifiePar) {
-    const client = await prisma.client.update({
+    const client = await prisma_1.default.client.update({
         where: { id: clientId },
         data: { limiteCredit },
     });
@@ -78,7 +80,7 @@ async function modifierLimiteCredit(clientId, limiteCredit, modifiePar) {
 }
 // ── Enregistrer un paiement de crédit
 async function enregistrerPaiementCredit(data) {
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         const client = await tx.client.findUnique({ where: { id: data.clientId } });
         if (!client)
             throw new Error('Client introuvable.');
@@ -104,7 +106,7 @@ async function enregistrerPaiementCredit(data) {
 }
 // ── Recalcule le statut crédit d'un client
 async function recalculerStatutCredit(clientId) {
-    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    const client = await prisma_1.default.client.findUnique({ where: { id: clientId } });
     if (!client)
         return;
     const creditUtilise = Number(client.creditUtilise);
@@ -119,21 +121,21 @@ async function recalculerStatutCredit(clientId) {
             nouveauStatut = 'A_RELANCER';
         }
     }
-    await prisma.client.update({
+    await prisma_1.default.client.update({
         where: { id: clientId },
         data: { statutCredit: nouveauStatut },
     });
 }
 // ── Fixer la date d'échéance et le taux d'intérêt d'un client (PDG uniquement)
 async function fixerEcheanceEtTaux(clientId, dateEcheance, tauxInteretMensuel) {
-    return prisma.client.update({
+    return prisma_1.default.client.update({
         where: { id: clientId },
         data: { dateEcheance, tauxInteretMensuel },
     });
 }
 // ── Enregistrer un versement de crédit (avec historique avant/apres)
 async function enregistrerVersementCredit(data) {
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         const client = await tx.client.findUnique({ where: { id: data.clientId } });
         if (!client)
             throw new Error('Client introuvable.');
@@ -163,7 +165,7 @@ async function enregistrerVersementCredit(data) {
 }
 // ── Historique des versements d'un client
 async function listerVersementsClient(clientId) {
-    return prisma.versementCredit.findMany({
+    return prisma_1.default.versementCredit.findMany({
         where: { clientId },
         orderBy: { date: 'desc' },
         include: {
@@ -174,7 +176,7 @@ async function listerVersementsClient(clientId) {
 // ── Applique les intérêts de retard sur tous les clients en échéance dépassée
 async function appliquerInteretsRetard() {
     const maintenant = new Date();
-    const clientsEnRetard = await prisma.client.findMany({
+    const clientsEnRetard = await prisma_1.default.client.findMany({
         where: {
             dateEcheance: { lt: maintenant },
             creditUtilise: { gt: 0 },
@@ -188,7 +190,7 @@ async function appliquerInteretsRetard() {
         const soldeAvant = Number(client.creditUtilise);
         const interet = soldeAvant * (taux / 100);
         const soldeApres = soldeAvant + interet;
-        await prisma.client.update({
+        await prisma_1.default.client.update({
             where: { id: client.id },
             data: {
                 creditUtilise: soldeApres,

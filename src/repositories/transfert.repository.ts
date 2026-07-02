@@ -5,9 +5,9 @@
 //        Seul le PDG peut approuver ou rejeter.
 // ============================================================
 
-import { PrismaClient, StatutTransfert } from '@prisma/client'
+import { StatutTransfert } from '@prisma/client'
+import prisma from '../lib/prisma'
 
-const prisma = new PrismaClient()
 
 // ── Créer une demande de transfert
 export async function creerTransfert(data: {

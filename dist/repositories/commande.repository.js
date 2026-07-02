@@ -3,24 +3,26 @@
 // FICHIER : src/repositories/commande.repository.ts
 // Rôle : Accès BD pour les commandes.
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.creerCommande = creerCommande;
 exports.listerCommandes = listerCommandes;
 exports.trouverCommandeParId = trouverCommandeParId;
 exports.changerStatutCommande = changerStatutCommande;
-const client_1 = require("@prisma/client");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const stock_repository_1 = require("./stock.repository");
-const prisma = new client_1.PrismaClient();
 // Génère un numéro de commande unique : BC-2026-000001
 async function genererNumeroCommande() {
     const annee = new Date().getFullYear();
-    const count = await prisma.commande.count();
+    const count = await prisma_1.default.commande.count();
     const numero = String(count + 1).padStart(6, '0');
     return `BC-${annee}-${numero}`;
 }
 // ── Créer une commande (transaction atomique)
 async function creerCommande(data) {
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         // 1. Calculer le montant total
         let montantTotal = 0;
         for (const ligne of data.lignes) {
@@ -95,7 +97,7 @@ async function listerCommandes(params) {
     if (params.statut)
         where.statut = params.statut;
     const [commandes, total] = await Promise.all([
-        prisma.commande.findMany({
+        prisma_1.default.commande.findMany({
             where,
             skip: params.skip,
             take: params.limit,
@@ -113,13 +115,13 @@ async function listerCommandes(params) {
             },
             orderBy: { date: 'desc' },
         }),
-        prisma.commande.count({ where }),
+        prisma_1.default.commande.count({ where }),
     ]);
     return { commandes, total };
 }
 // ── Trouver une commande par ID
 async function trouverCommandeParId(id) {
-    return prisma.commande.findUnique({
+    return prisma_1.default.commande.findUnique({
         where: { id },
         include: {
             client: true,
@@ -139,7 +141,7 @@ async function trouverCommandeParId(id) {
 }
 // ── Changer le statut d'une commande
 async function changerStatutCommande(id, statut) {
-    return prisma.commande.update({
+    return prisma_1.default.commande.update({
         where: { id },
         data: { statut },
     });

@@ -5,17 +5,19 @@
 //        Seul le magasinier de Douala peut initier un transfert.
 //        Seul le PDG peut approuver ou rejeter.
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.creerTransfert = creerTransfert;
 exports.listerTransferts = listerTransferts;
 exports.approuverTransfert = approuverTransfert;
 exports.rejeterTransfert = rejeterTransfert;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 // ── Créer une demande de transfert
 async function creerTransfert(data) {
     // Vérifier que le stock source est suffisant
-    const stock = await prisma.stock.findFirst({
+    const stock = await prisma_1.default.stock.findFirst({
         where: {
             agenceId: data.agenceSourceId,
             fruitId: data.fruitId,
@@ -26,7 +28,7 @@ async function creerTransfert(data) {
     if (!stock) {
         throw new Error('Stock insuffisant pour ce transfert.');
     }
-    return prisma.transfert.create({
+    return prisma_1.default.transfert.create({
         data: {
             agenceSourceId: data.agenceSourceId,
             agenceDestinationId: data.agenceDestinationId,
@@ -58,7 +60,7 @@ async function listerTransferts(params) {
         ];
     }
     const [transferts, total] = await Promise.all([
-        prisma.transfert.findMany({
+        prisma_1.default.transfert.findMany({
             where,
             skip: params.skip,
             take: params.limit,
@@ -72,13 +74,13 @@ async function listerTransferts(params) {
             },
             orderBy: { dateDemande: 'desc' },
         }),
-        prisma.transfert.count({ where }),
+        prisma_1.default.transfert.count({ where }),
     ]);
     return { transferts, total };
 }
 // ── Approuver un transfert (PDG uniquement) — transaction atomique
 async function approuverTransfert(id, validePar) {
-    return prisma.$transaction(async (tx) => {
+    return prisma_1.default.$transaction(async (tx) => {
         const transfert = await tx.transfert.findUnique({ where: { id } });
         if (!transfert)
             throw new Error('Transfert introuvable.');
@@ -136,12 +138,12 @@ async function approuverTransfert(id, validePar) {
 }
 // ── Rejeter un transfert
 async function rejeterTransfert(id, validePar) {
-    const transfert = await prisma.transfert.findUnique({ where: { id } });
+    const transfert = await prisma_1.default.transfert.findUnique({ where: { id } });
     if (!transfert)
         throw new Error('Transfert introuvable.');
     if (transfert.statut !== 'EN_ATTENTE')
         throw new Error('Ce transfert a déjà été traité.');
-    return prisma.transfert.update({
+    return prisma_1.default.transfert.update({
         where: { id },
         data: { statut: 'REJETE', validePar, dateValidation: new Date() },
     });

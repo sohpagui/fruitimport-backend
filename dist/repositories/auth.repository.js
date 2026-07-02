@@ -8,17 +8,19 @@
 // Architecture en couches :
 // Route → Controller → Service → Repository → Prisma → MySQL
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.trouverUserParIdentifiant = trouverUserParIdentifiant;
 exports.trouverClientParIdentifiant = trouverClientParIdentifiant;
 exports.creerClient = creerClient;
 exports.telephoneExiste = telephoneExiste;
 exports.emailExiste = emailExiste;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 // Trouve un employé par téléphone ou email
 async function trouverUserParIdentifiant(identifiant) {
-    return prisma.user.findFirst({
+    return prisma_1.default.user.findFirst({
         where: {
             OR: [
                 { telephone: identifiant },
@@ -35,7 +37,7 @@ async function trouverUserParIdentifiant(identifiant) {
 }
 // Trouve un client par téléphone ou email
 async function trouverClientParIdentifiant(identifiant) {
-    return prisma.client.findFirst({
+    return prisma_1.default.client.findFirst({
         where: {
             OR: [
                 { telephone: identifiant },
@@ -52,7 +54,7 @@ async function trouverClientParIdentifiant(identifiant) {
 }
 // Crée un nouveau compte client (auto-inscription)
 async function creerClient(data) {
-    return prisma.client.create({
+    return prisma_1.default.client.create({
         data,
         include: {
             agence: {
@@ -63,14 +65,14 @@ async function creerClient(data) {
 }
 // Vérifie qu'un téléphone n'est pas déjà utilisé (user ou client)
 async function telephoneExiste(telephone) {
-    const user = await prisma.user.findUnique({ where: { telephone } });
-    const client = await prisma.client.findUnique({ where: { telephone } });
+    const user = await prisma_1.default.user.findUnique({ where: { telephone } });
+    const client = await prisma_1.default.client.findUnique({ where: { telephone } });
     return !!(user || client);
 }
 // Vérifie qu'un email n'est pas déjà utilisé
 async function emailExiste(email) {
-    const user = await prisma.user.findFirst({ where: { email } });
-    const client = await prisma.client.findFirst({ where: { email } });
+    const user = await prisma_1.default.user.findFirst({ where: { email } });
+    const client = await prisma_1.default.client.findFirst({ where: { email } });
     return !!(user || client);
 }
 //# sourceMappingURL=auth.repository.js.map

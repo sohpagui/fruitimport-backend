@@ -3,9 +3,9 @@
 // Rôle : Accès BD pour les livraisons.
 // ============================================================
 
-import { PrismaClient, StatutLivraison } from '@prisma/client'
+import { StatutLivraison } from '@prisma/client'
+import prisma from '../lib/prisma'
 
-const prisma = new PrismaClient()
 
 // ── Créer une livraison
 export async function creerLivraison(data: {

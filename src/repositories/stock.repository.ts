@@ -3,9 +3,9 @@
 // Rôle : Accès BD pour tout ce qui concerne le stock.
 // ============================================================
 
-import { PrismaClient, Origine, CategorieStock } from '@prisma/client'
+import { Origine, CategorieStock } from '@prisma/client'
+import prisma from '../lib/prisma'
 
-const prisma = new PrismaClient()
 
 // ── Lister les stocks avec filtres
 export async function listerStocks(params: {
