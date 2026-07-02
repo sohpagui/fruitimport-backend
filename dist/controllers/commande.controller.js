@@ -39,7 +39,9 @@ async function listerCommandes(req, res) {
         const pagination = (0, pagination_1.getPagination)(req);
         const agenceId = req.query.agence_id ? parseInt(req.query.agence_id) : undefined;
         const statut = req.query.statut;
-        const { commandes, total } = await (0, commande_service_1.obtenirCommandes)({ ...pagination, agenceId, statut });
+        // Si c est un client, il ne voit que ses propres commandes
+        let clientId = req.query.client_id ? parseInt(req.query.client_id) : undefined;
+        const { commandes, total } = await (0, commande_service_1.obtenirCommandes)({ ...pagination, agenceId, clientId, statut });
         return (0, response_1.repondreSucces)(res, { commandes, pagination: (0, pagination_1.formatPagination)(total, pagination) });
     }
     catch (e) {

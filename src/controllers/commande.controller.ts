@@ -34,7 +34,9 @@ export async function listerCommandes(req: Request, res: Response) {
     const pagination = getPagination(req)
     const agenceId = req.query.agence_id ? parseInt(req.query.agence_id as string) : undefined
     const statut = req.query.statut as any
-    const { commandes, total } = await obtenirCommandes({ ...pagination, agenceId, statut })
+    // Si c est un client, il ne voit que ses propres commandes
+    let clientId = req.query.client_id ? parseInt(req.query.client_id as string) : undefined
+    const { commandes, total } = await obtenirCommandes({ ...pagination, agenceId, clientId, statut })
     return repondreSucces(res, { commandes, pagination: formatPagination(total, pagination) })
   } catch (e: any) { return repondreErreur(res, e.message, 500) }
 }
