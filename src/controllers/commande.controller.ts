@@ -59,3 +59,12 @@ export async function changerStatut(req: Request, res: Response) {
     return repondreErreur(res, e.message, 400)
   }
 }
+
+import { genererBonCommande } from '../services/pdf.service'
+
+export async function bonCommandePDF(req: Request, res: Response) {
+  try {
+    const commande = await obtenirCommande(parseInt(req.params.id))
+    await genererBonCommande(commande, res)
+  } catch (e: any) { return repondreErreur(res, e.message, 404) }
+}

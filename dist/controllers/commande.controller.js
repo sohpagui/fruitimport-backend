@@ -4,6 +4,7 @@ exports.creerCommande = creerCommande;
 exports.listerCommandes = listerCommandes;
 exports.detailCommande = detailCommande;
 exports.changerStatut = changerStatut;
+exports.bonCommandePDF = bonCommandePDF;
 const zod_1 = require("zod");
 const commande_service_1 = require("../services/commande.service");
 const response_1 = require("../utils/response");
@@ -69,6 +70,16 @@ async function changerStatut(req, res) {
         if (e.name === 'ZodError')
             return (0, response_1.repondreErreur)(res, 'Statut invalide.', 400, e.errors);
         return (0, response_1.repondreErreur)(res, e.message, 400);
+    }
+}
+const pdf_service_1 = require("../services/pdf.service");
+async function bonCommandePDF(req, res) {
+    try {
+        const commande = await (0, commande_service_1.obtenirCommande)(parseInt(req.params.id));
+        await (0, pdf_service_1.genererBonCommande)(commande, res);
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 404);
     }
 }
 //# sourceMappingURL=commande.controller.js.map
