@@ -32,7 +32,7 @@ async function listerStocks(params) {
             take: params.limit,
             include: {
                 agence: { select: { id: true, nom: true } },
-                fruit: { select: { id: true, nom: true, uniteMesure: true } },
+                fruit: { select: { id: true, nom: true, uniteMesure: true, imageUrl: true } },
                 calibre: { select: { id: true, valeur: true } },
             },
             orderBy: [{ fruit: { nom: 'asc' } }, { calibre: { ordreAffichage: 'asc' } }],
@@ -50,7 +50,7 @@ async function obtenirAlertesStock(agenceId) {
         where,
         include: {
             agence: { select: { id: true, nom: true } },
-            fruit: { select: { id: true, nom: true } },
+            fruit: { select: { id: true, nom: true, imageUrl: true } },
             calibre: { select: { id: true, valeur: true } },
         },
         orderBy: { quantiteCartons: 'asc' },
@@ -192,7 +192,7 @@ async function obtenirCatalogue(agenceId) {
             quantiteCartons: { gt: 0 },
         },
         include: {
-            fruit: { select: { id: true, nom: true, uniteMesure: true } },
+            fruit: { select: { id: true, nom: true, uniteMesure: true, imageUrl: true } },
             calibre: { select: { id: true, valeur: true, ordreAffichage: true } },
         },
         orderBy: [{ fruit: { nom: 'asc' } }, { calibre: { ordreAffichage: 'asc' } }],

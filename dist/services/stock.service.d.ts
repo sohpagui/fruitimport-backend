@@ -14,6 +14,7 @@ export declare function obtenirStocks(params: PaginationParams & {
             id: number;
             nom: string;
             uniteMesure: string;
+            imageUrl: string;
         };
         calibre: {
             id: number;
@@ -40,6 +41,7 @@ export declare function obtenirAlertes(agenceId?: number): Promise<({
     fruit: {
         id: number;
         nom: string;
+        imageUrl: string;
     };
     calibre: {
         id: number;
@@ -85,6 +87,7 @@ export declare function obtenirCatalogueAgence(agenceId: number): Promise<({
         id: number;
         nom: string;
         uniteMesure: string;
+        imageUrl: string;
     };
     calibre: {
         id: number;

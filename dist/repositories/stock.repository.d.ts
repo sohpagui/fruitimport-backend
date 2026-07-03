@@ -16,6 +16,7 @@ export declare function listerStocks(params: {
             id: number;
             nom: string;
             uniteMesure: string;
+            imageUrl: string;
         };
         calibre: {
             id: number;
@@ -42,6 +43,7 @@ export declare function obtenirAlertesStock(agenceId?: number): Promise<({
     fruit: {
         id: number;
         nom: string;
+        imageUrl: string;
     };
     calibre: {
         id: number;
@@ -106,6 +108,7 @@ export declare function obtenirCatalogue(agenceId: number): Promise<({
         id: number;
         nom: string;
         uniteMesure: string;
+        imageUrl: string;
     };
     calibre: {
         id: number;
