@@ -12,6 +12,10 @@ import { Role } from '@prisma/client'
 const router = Router()
 
 // Toutes les routes admin nécessitent d'être connecté ET d'être PDG
+// Route accessible a la secretaire pour voir les livreurs
+router.get("/livreurs", authentifier, autoriser(Role.PDG, Role.SECRETAIRE), listerUsers)
+
+// Toutes les autres routes nécessitent d'être PDG
 router.use(authentifier, autoriser(Role.PDG))
 
 router.post('/', creerUser)        // POST   /admin/users
