@@ -22,21 +22,18 @@ router.post('/:id/image', authentifier, autoriser(Role.PDG, Role.SECRETAIRE), up
   try {
     if (!req.file) return repondreErreur(res, 'Aucun fichier reçu.', 400)
 
-    // Upload vers Cloudinary
-    const result = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: 'fruitimport/fruits', public_id: `fruit_${req.params.id}`, overwrite: true },
-        (error, result) => {
-          if (error) reject(error)
-          else resolve(result)
-        }
-      ).end(req.file!.buffer)
+    const b64 = Buffer.from(req.file.buffer).toString('base64')
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`
+
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: 'fruitimport/fruits',
+      public_id: `fruit_${req.params.id}`,
+      overwrite: true,
     })
 
-    const imageUrl = result.secure_url
     const fruit = await prisma.fruit.update({
       where: { id: parseInt(req.params.id) },
-      data: { imageUrl },
+      data: { imageUrl: result.secure_url },
     })
     return repondreSucces(res, fruit, 'Image mise à jour.')
   } catch (e: any) { return repondreErreur(res, e.message, 500) }
