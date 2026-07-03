@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import path from 'path'
 import prisma from '../lib/prisma'
+import cloudinary from '../lib/cloudinary'
 import { authentifier, autoriser } from '../middlewares/auth.middleware'
 import { upload } from '../middlewares/upload.middleware'
 import { repondreSucces, repondreErreur } from '../utils/response'
@@ -8,7 +8,6 @@ import { Role } from '@prisma/client'
 
 const router = Router()
 
-// GET /fruits — Liste tous les fruits avec leurs calibres
 router.get('/', authentifier, async (req, res) => {
   try {
     const fruits = await prisma.fruit.findMany({
@@ -19,12 +18,22 @@ router.get('/', authentifier, async (req, res) => {
   } catch (e: any) { return repondreErreur(res, e.message, 500) }
 })
 
-// POST /fruits/:id/image — Upload image d'un fruit (PDG ou Secrétaire)
 router.post('/:id/image', authentifier, autoriser(Role.PDG, Role.SECRETAIRE), upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return repondreErreur(res, 'Aucun fichier reçu.', 400)
-    const baseUrl = process.env.BASE_URL || `https://fruitimport-backend.onrender.com`
-    const imageUrl = `${baseUrl}/uploads/fruits/${req.file.filename}`
+
+    // Upload vers Cloudinary
+    const result = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: 'fruitimport/fruits', public_id: `fruit_${req.params.id}`, overwrite: true },
+        (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }
+      ).end(req.file!.buffer)
+    })
+
+    const imageUrl = result.secure_url
     const fruit = await prisma.fruit.update({
       where: { id: parseInt(req.params.id) },
       data: { imageUrl },
