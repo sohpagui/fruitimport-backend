@@ -17,6 +17,7 @@ import transfertRoutes from './routes/transfert.routes'
 import dashboardRoutes from './routes/dashboard.routes'
 import agenceRoutes from './routes/agence.routes'
 import fruitRoutes from './routes/fruit.routes'
+import retourRoutes from './routes/retour.routes'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -49,6 +50,7 @@ app.use('/transferts', transfertRoutes)
 app.use('/dashboard', dashboardRoutes)
 app.use('/agences', agenceRoutes)
 app.use('/fruits', fruitRoutes)
+app.use('/retours', retourRoutes)
 
 // Route de santé
 app.get('/health', (req, res) => {

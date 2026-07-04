@@ -172,6 +172,7 @@ model User {
   pertesDeclarees   Perte[]
   paiementsEnregistres PaiementCredit[]
   versementsEnregistres VersementCredit[]
+  retoursMarchandise    RetourMarchandise[]
   notifications     Notification[]
   logsActions       LogAction[]
   historiqueConnexions HistoriqueConnexion[]
@@ -195,6 +196,7 @@ model Fruit {
   // Relations
   calibres   Calibre[]
   stocks     Stock[]
+  retours    RetourMarchandise[]
   receptions ReceptionMarchandise[]
   pertes     Perte[]
   lignesCommande LigneCommande[]
@@ -220,6 +222,7 @@ model Calibre {
   receptions     ReceptionMarchandise[]
   pertes         Perte[]
   lignesCommande LigneCommande[]
+  retours        RetourMarchandise[]
   transferts     Transfert[]
 
   @@index([fruitId])
@@ -416,6 +419,7 @@ model Livraison {
   // Relations
   commande Commande @relation(fields: [commandeId], references: [id])
   livreur  User     @relation("LivreurLivraison", fields: [livreurId], references: [id])
+  retours  RetourMarchandise[]
 
   @@index([livreurId])
   @@index([statut])
@@ -583,4 +587,28 @@ model HistoriqueConnexion {
   @@index([userId])
   @@index([createdAt])
   @@map("historique_connexions")
+}
+
+// ============================================================
+// TABLE : retours_marchandise
+// Gestion des retours lors de la livraison
+// ============================================================
+model RetourMarchandise {
+  id          Int      @id @default(autoincrement())
+  livraisonId Int      @map("livraison_id")
+  fruitId     Int      @map("fruit_id")
+  calibreId   Int      @map("calibre_id")
+  quantite    Int
+  raison      String   @db.VarChar(255)
+  statut      String   @default("EN_ATTENTE") @db.VarChar(50)
+  enregistrePar Int    @map("enregistre_par")
+  createdAt   DateTime @default(now())
+
+  livraison    Livraison @relation(fields: [livraisonId], references: [id])
+  fruit        Fruit     @relation(fields: [fruitId], references: [id])
+  calibre      Calibre   @relation(fields: [calibreId], references: [id])
+  employe      User      @relation(fields: [enregistrePar], references: [id])
+
+  @@index([livraisonId])
+  @@map("retours_marchandise")
 }

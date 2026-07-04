@@ -21,6 +21,7 @@ const transfert_routes_1 = __importDefault(require("./routes/transfert.routes"))
 const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
 const agence_routes_1 = __importDefault(require("./routes/agence.routes"));
 const fruit_routes_1 = __importDefault(require("./routes/fruit.routes"));
+const retour_routes_1 = __importDefault(require("./routes/retour.routes"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 // Créer les dossiers nécessaires
@@ -50,6 +51,7 @@ app.use('/transferts', transfert_routes_1.default);
 app.use('/dashboard', dashboard_routes_1.default);
 app.use('/agences', agence_routes_1.default);
 app.use('/fruits', fruit_routes_1.default);
+app.use('/retours', retour_routes_1.default);
 // Route de santé
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', version: '1.0.0', timestamp: new Date().toISOString() });
