@@ -52,6 +52,7 @@ app.use('/dashboard', dashboard_routes_1.default);
 app.use('/agences', agence_routes_1.default);
 app.use('/fruits', fruit_routes_1.default);
 app.use('/retours', retour_routes_1.default);
+app.get('/health', (req, res) => res.json({ status: "ok", timestamp: new Date() }));
 // Route de santé
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', version: '1.0.0', timestamp: new Date().toISOString() });

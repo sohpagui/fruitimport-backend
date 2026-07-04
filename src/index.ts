@@ -51,6 +51,7 @@ app.use('/dashboard', dashboardRoutes)
 app.use('/agences', agenceRoutes)
 app.use('/fruits', fruitRoutes)
 app.use('/retours', retourRoutes)
+app.get('/health', (req, res) => res.json({ status: "ok", timestamp: new Date() }))
 
 // Route de santé
 app.get('/health', (req, res) => {
