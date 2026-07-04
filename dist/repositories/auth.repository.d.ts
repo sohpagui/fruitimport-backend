@@ -12,6 +12,7 @@ export declare function trouverUserParIdentifiant(identifiant: string): Promise<
     motDePasseHash: string;
     role: import(".prisma/client").$Enums.Role;
     agenceId: number | null;
+    photoUrl: string | null;
     actif: boolean;
     tentativesEchouees: number;
     bloqueJusquA: Date | null;
@@ -33,6 +34,7 @@ export declare function trouverClientParIdentifiant(identifiant: string): Promis
     email: string | null;
     motDePasseHash: string;
     agenceId: number;
+    photoUrl: string | null;
     actif: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -65,6 +67,7 @@ export declare function creerClient(data: {
     email: string | null;
     motDePasseHash: string;
     agenceId: number;
+    photoUrl: string | null;
     actif: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -88,6 +91,7 @@ export declare function changerMotDePasse(userId: number, nouveauHash: string): 
     motDePasseHash: string;
     role: import(".prisma/client").$Enums.Role;
     agenceId: number | null;
+    photoUrl: string | null;
     actif: boolean;
     tentativesEchouees: number;
     bloqueJusquA: Date | null;

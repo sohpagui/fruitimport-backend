@@ -12,6 +12,7 @@ export declare function assignerLivraison(data: {
             email: string | null;
             motDePasseHash: string;
             agenceId: number;
+            photoUrl: string | null;
             actif: boolean;
             createdAt: Date;
             updatedAt: Date;

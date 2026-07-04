@@ -152,6 +152,7 @@ model User {
   motDePasseHash String   @map("mot_de_passe_hash") @db.VarChar(255)
   role           Role
   agenceId       Int?     @map("agence_id")         // null pour le PDG
+  photoUrl       String?  @map("photo_url") @db.VarChar(500)
   actif          Boolean  @default(true)
   tentativesEchouees Int  @default(0) @map("tentatives_echouees")
   bloqueJusquA   DateTime? @map("bloque_jusqu_a")
@@ -327,6 +328,7 @@ model Client {
   motDePasseHash String      @map("mot_de_passe_hash") @db.VarChar(255)
   limiteCredit  Decimal      @default(0) @map("limite_credit") @db.Decimal(10, 2)
   creditUtilise Decimal      @default(0) @map("credit_utilise") @db.Decimal(10, 2)
+  photoUrl      String?      @map("photo_url") @db.VarChar(500)
   statutCredit  StatutCredit @default(EN_REGLE) @map("statut_credit")
   dateEcheance  DateTime?    @map("date_echeance")
   tauxInteretMensuel Decimal @default(0) @map("taux_interet_mensuel") @db.Decimal(5, 2)

@@ -138,6 +138,7 @@ export declare function trouverCommandeParId(id: number): Promise<{
         email: string | null;
         motDePasseHash: string;
         agenceId: number;
+        photoUrl: string | null;
         actif: boolean;
         createdAt: Date;
         updatedAt: Date;

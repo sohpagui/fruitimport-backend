@@ -123,6 +123,7 @@ export declare function obtenirCommande(id: number): Promise<{
         email: string | null;
         motDePasseHash: string;
         agenceId: number;
+        photoUrl: string | null;
         actif: boolean;
         createdAt: Date;
         updatedAt: Date;

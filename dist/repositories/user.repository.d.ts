@@ -79,6 +79,7 @@ export declare function desactiverUser(id: number): Promise<{
     motDePasseHash: string;
     role: import(".prisma/client").$Enums.Role;
     agenceId: number | null;
+    photoUrl: string | null;
     actif: boolean;
     tentativesEchouees: number;
     bloqueJusquA: Date | null;

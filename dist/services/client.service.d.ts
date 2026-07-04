@@ -50,6 +50,7 @@ export declare function obtenirClient(id: number): Promise<{
     email: string | null;
     motDePasseHash: string;
     agenceId: number;
+    photoUrl: string | null;
     actif: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -68,6 +69,7 @@ export declare function mettreAJourLimiteCredit(clientId: number, limiteCredit: 
     email: string | null;
     motDePasseHash: string;
     agenceId: number;
+    photoUrl: string | null;
     actif: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -99,6 +101,7 @@ export declare function definirEcheanceEtTaux(clientId: number, dateEcheance: Da
     email: string | null;
     motDePasseHash: string;
     agenceId: number;
+    photoUrl: string | null;
     actif: boolean;
     createdAt: Date;
     updatedAt: Date;
