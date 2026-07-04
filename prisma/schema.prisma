@@ -153,6 +153,9 @@ model User {
   role           Role
   agenceId       Int?     @map("agence_id")         // null pour le PDG
   actif          Boolean  @default(true)
+  tentativesEchouees Int  @default(0) @map("tentatives_echouees")
+  bloqueJusquA   DateTime? @map("bloque_jusqu_a")
+  derniereCo     DateTime? @map("derniere_connexion")
   creePar        Int?     @map("cree_par_id")        // null pour le PDG (premier compte)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -171,6 +174,7 @@ model User {
   versementsEnregistres VersementCredit[]
   notifications     Notification[]
   logsActions       LogAction[]
+  historiqueConnexions HistoriqueConnexion[]
 
   @@index([agenceId])
   @@index([role])
@@ -560,4 +564,23 @@ model ParametreSysteme {
   valeur String @db.VarChar(255)
 
   @@map("parametres_systeme")
+}
+
+// ============================================================
+// TABLE : historique_connexions
+// Trace toutes les connexions des utilisateurs
+// ============================================================
+model HistoriqueConnexion {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.VarChar(255)
+  succes    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("historique_connexions")
 }

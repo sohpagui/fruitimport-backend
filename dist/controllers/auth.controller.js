@@ -6,14 +6,22 @@
 //        Le controller ne contient PAS de logique métier —
 //        il délègue tout au service.
 // ============================================================
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = login;
 exports.refreshToken = refreshToken;
 exports.logout = logout;
 exports.registerClient = registerClient;
 exports.me = me;
+exports.changerPassword = changerPassword;
+exports.historiqueConnexions = historiqueConnexions;
 const zod_1 = require("zod");
 const auth_service_1 = require("../services/auth.service");
+const auth_repository_1 = require("../repositories/auth.repository");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const response_1 = require("../utils/response");
 // Schémas de validation Zod
 const schemaConnexion = zod_1.z.object({
@@ -81,5 +89,38 @@ async function registerClient(req, res) {
 // GET /auth/me — Infos de l'utilisateur connecté
 async function me(req, res) {
     return (0, response_1.repondreSucces)(res, req.user);
+}
+// PATCH /auth/changer-mot-de-passe
+async function changerPassword(req, res) {
+    try {
+        const { ancienMotDePasse, nouveauMotDePasse } = zod_1.z.object({
+            ancienMotDePasse: zod_1.z.string().min(6),
+            nouveauMotDePasse: zod_1.z.string().min(6),
+        }).parse(req.body);
+        const user = await prisma_1.default.user.findUnique({ where: { id: req.user.id } });
+        if (!user)
+            return (0, response_1.repondreErreur)(res, 'Utilisateur introuvable.', 404);
+        const valide = await bcryptjs_1.default.compare(ancienMotDePasse, user.motDePasseHash);
+        if (!valide)
+            return (0, response_1.repondreErreur)(res, 'Ancien mot de passe incorrect.', 400);
+        const hash = await bcryptjs_1.default.hash(nouveauMotDePasse, 12);
+        await (0, auth_repository_1.changerMotDePasse)(req.user.id, hash);
+        return (0, response_1.repondreSucces)(res, null, 'Mot de passe changé avec succès.');
+    }
+    catch (e) {
+        if (e.name === 'ZodError')
+            return (0, response_1.repondreErreur)(res, 'Données invalides.', 400, e.errors);
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
+}
+// GET /auth/historique-connexions
+async function historiqueConnexions(req, res) {
+    try {
+        const historique = await (0, auth_repository_1.obtenirHistoriqueConnexions)(req.user.id);
+        return (0, response_1.repondreSucces)(res, historique);
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
 }
 //# sourceMappingURL=auth.controller.js.map

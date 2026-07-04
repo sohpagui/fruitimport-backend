@@ -16,5 +16,7 @@ router.post('/register-client', auth_controller_1.registerClient);
 // Routes protégées (token requis)
 router.post('/logout', auth_middleware_1.authentifier, auth_controller_1.logout);
 router.get('/me', auth_middleware_1.authentifier, auth_controller_1.me);
+router.patch('/changer-mot-de-passe', auth_middleware_1.authentifier, auth_controller_1.changerPassword);
+router.get('/historique-connexions', auth_middleware_1.authentifier, auth_controller_1.historiqueConnexions);
 exports.default = router;
 //# sourceMappingURL=auth.routes.js.map

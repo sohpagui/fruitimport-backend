@@ -13,6 +13,10 @@ import {
   creerClient,
   telephoneExiste,
   emailExiste,
+  enregistrerConnexion,
+  estBloque,
+  changerMotDePasse,
+  obtenirHistoriqueConnexions,
 } from '../repositories/auth.repository'
 import {
   genererAccessToken,
@@ -37,13 +41,29 @@ export async function connexion(identifiant: string, motDePasse: string) {
     isClient = true
   }
 
-  // 3. Vérifie le mot de passe
+  // 3. Vérifie si le compte est bloqué (seulement pour les employés)
+  if (!isClient) {
+    const bloque = await estBloque(utilisateur.id)
+    if (bloque) {
+      throw new Error('Compte bloqué temporairement. Réessayez dans 30 minutes.')
+    }
+  }
+
+  // 4. Vérifie le mot de passe
   const mdpValide = await bcrypt.compare(motDePasse, utilisateur.motDePasseHash)
   if (!mdpValide) {
+    if (!isClient) {
+      await enregistrerConnexion(utilisateur.id, false)
+    }
     throw new Error('Identifiant ou mot de passe incorrect.')
   }
 
-  // 4. Génère les tokens JWT
+  // 5. Enregistrer connexion réussie
+  if (!isClient) {
+    await enregistrerConnexion(utilisateur.id, true)
+  }
+
+  // 6. Génère les tokens JWT
   const payload = {
     id: utilisateur.id,
     role: utilisateur.role as Role,

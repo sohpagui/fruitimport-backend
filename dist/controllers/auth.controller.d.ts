@@ -4,4 +4,6 @@ export declare function refreshToken(req: Request, res: Response): Promise<Respo
 export declare function logout(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
 export declare function registerClient(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
 export declare function me(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
+export declare function changerPassword(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
+export declare function historiqueConnexions(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
 //# sourceMappingURL=auth.controller.d.ts.map

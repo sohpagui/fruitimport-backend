@@ -5,7 +5,7 @@
 // ============================================================
 
 import { Router } from 'express'
-import { login, refreshToken, logout, registerClient, me } from '../controllers/auth.controller'
+import { login, refreshToken, logout, registerClient, me, changerPassword, historiqueConnexions } from '../controllers/auth.controller'
 import { authentifier } from '../middlewares/auth.middleware'
 
 const router = Router()
@@ -19,4 +19,6 @@ router.post('/register-client', registerClient)
 router.post('/logout', authentifier, logout)
 router.get('/me', authentifier, me)
 
+router.patch('/changer-mot-de-passe', authentifier, changerPassword)
+router.get('/historique-connexions', authentifier, historiqueConnexions)
 export default router

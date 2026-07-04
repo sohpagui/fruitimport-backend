@@ -80,6 +80,9 @@ export declare function desactiverUser(id: number): Promise<{
     role: import(".prisma/client").$Enums.Role;
     agenceId: number | null;
     actif: boolean;
+    tentativesEchouees: number;
+    bloqueJusquA: Date | null;
+    derniereCo: Date | null;
     creePar: number | null;
     createdAt: Date;
     updatedAt: Date;
@@ -92,9 +95,9 @@ export declare function loggerAction(data: {
 }): Promise<{
     id: number;
     createdAt: Date;
-    action: string;
-    details: string | null;
     ipAddress: string | null;
     userId: number;
+    action: string;
+    details: string | null;
 }>;
 //# sourceMappingURL=user.repository.d.ts.map

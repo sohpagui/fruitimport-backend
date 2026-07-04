@@ -13,6 +13,9 @@ export declare function trouverUserParIdentifiant(identifiant: string): Promise<
     role: import(".prisma/client").$Enums.Role;
     agenceId: number | null;
     actif: boolean;
+    tentativesEchouees: number;
+    bloqueJusquA: Date | null;
+    derniereCo: Date | null;
     creePar: number | null;
     createdAt: Date;
     updatedAt: Date;
@@ -75,4 +78,30 @@ export declare function creerClient(data: {
 }>;
 export declare function telephoneExiste(telephone: string): Promise<boolean>;
 export declare function emailExiste(email: string): Promise<boolean>;
+export declare function enregistrerConnexion(userId: number, succes: boolean, ip?: string, userAgent?: string): Promise<void>;
+export declare function estBloque(userId: number): Promise<boolean>;
+export declare function changerMotDePasse(userId: number, nouveauHash: string): Promise<{
+    id: number;
+    nom: string;
+    telephone: string;
+    email: string | null;
+    motDePasseHash: string;
+    role: import(".prisma/client").$Enums.Role;
+    agenceId: number | null;
+    actif: boolean;
+    tentativesEchouees: number;
+    bloqueJusquA: Date | null;
+    derniereCo: Date | null;
+    creePar: number | null;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function obtenirHistoriqueConnexions(userId: number): Promise<{
+    id: number;
+    createdAt: Date;
+    ipAddress: string | null;
+    userAgent: string | null;
+    succes: boolean;
+    userId: number;
+}[]>;
 //# sourceMappingURL=auth.repository.d.ts.map

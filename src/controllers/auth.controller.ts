@@ -9,6 +9,9 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import { connexion, rafraichirToken, inscrireClient } from '../services/auth.service'
+import { changerMotDePasse, obtenirHistoriqueConnexions } from '../repositories/auth.repository'
+import bcrypt from 'bcryptjs'
+import prisma from '../lib/prisma'
 import { repondreSucces, repondreErreur } from '../utils/response'
 
 // Schémas de validation Zod
@@ -80,4 +83,35 @@ export async function registerClient(req: Request, res: Response) {
 // GET /auth/me — Infos de l'utilisateur connecté
 export async function me(req: Request, res: Response) {
   return repondreSucces(res, req.user)
+}
+
+// PATCH /auth/changer-mot-de-passe
+export async function changerPassword(req: Request, res: Response) {
+  try {
+    const { ancienMotDePasse, nouveauMotDePasse } = z.object({
+      ancienMotDePasse: z.string().min(6),
+      nouveauMotDePasse: z.string().min(6),
+    }).parse(req.body)
+
+    const user = await prisma.user.findUnique({ where: { id: req.user!.id } })
+    if (!user) return repondreErreur(res, 'Utilisateur introuvable.', 404)
+
+    const valide = await bcrypt.compare(ancienMotDePasse, user.motDePasseHash)
+    if (!valide) return repondreErreur(res, 'Ancien mot de passe incorrect.', 400)
+
+    const hash = await bcrypt.hash(nouveauMotDePasse, 12)
+    await changerMotDePasse(req.user!.id, hash)
+    return repondreSucces(res, null, 'Mot de passe changé avec succès.')
+  } catch (e: any) {
+    if (e.name === 'ZodError') return repondreErreur(res, 'Données invalides.', 400, e.errors)
+    return repondreErreur(res, e.message, 500)
+  }
+}
+
+// GET /auth/historique-connexions
+export async function historiqueConnexions(req: Request, res: Response) {
+  try {
+    const historique = await obtenirHistoriqueConnexions(req.user!.id)
+    return repondreSucces(res, historique)
+  } catch (e: any) { return repondreErreur(res, e.message, 500) }
 }
