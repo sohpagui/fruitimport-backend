@@ -105,4 +105,16 @@ router.post('/conversations/:id/messages', authentifier, upload.single('image'),
   } catch (e: any) { return repondreErreur(res, e.message, 500) }
 })
 
+// GET /chat/non-lus — Nombre de messages non lus
+router.get('/non-lus', authentifier, async (req, res) => {
+  try {
+    const count = await prisma.message.count({
+      where: { 
+        lu: false
+      }
+    })
+    return repondreSucces(res, { count })
+  } catch (e: any) { return repondreErreur(res, e.message, 500) }
+})
+
 export default router

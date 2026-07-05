@@ -116,5 +116,19 @@ router.post('/conversations/:id/messages', auth_middleware_1.authentifier, uploa
         return (0, response_1.repondreErreur)(res, e.message, 500);
     }
 });
+// GET /chat/non-lus — Nombre de messages non lus
+router.get('/non-lus', auth_middleware_1.authentifier, async (req, res) => {
+    try {
+        const count = await prisma_1.default.message.count({
+            where: {
+                lu: false
+            }
+        });
+        return (0, response_1.repondreSucces)(res, { count });
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
+});
 exports.default = router;
 //# sourceMappingURL=chat.routes.js.map
