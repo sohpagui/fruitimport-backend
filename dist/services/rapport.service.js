@@ -52,7 +52,8 @@ async function genererRapportJournalier() {
                     folder: 'fruitimport/rapports',
                     public_id: `rapport_${dateStr}.pdf`,
                     overwrite: true,
-                    resource_type: 'raw'
+                    resource_type: 'raw',
+                    access_mode: 'public'
                 });
                 // Sauvegarder l URL dans les parametres
                 await prisma_1.default.parametreSysteme.upsert({

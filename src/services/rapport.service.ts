@@ -50,7 +50,8 @@ export async function genererRapportJournalier(): Promise<string> {
           folder: 'fruitimport/rapports',
           public_id: `rapport_${dateStr}.pdf`,
           overwrite: true,
-          resource_type: 'raw'
+          resource_type: 'raw',
+          access_mode: 'public'
         })
         // Sauvegarder l URL dans les parametres
         await prisma.parametreSysteme.upsert({
