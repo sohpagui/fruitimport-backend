@@ -18,6 +18,7 @@ import dashboardRoutes from './routes/dashboard.routes'
 import agenceRoutes from './routes/agence.routes'
 import fruitRoutes from './routes/fruit.routes'
 import retourRoutes from './routes/retour.routes'
+import parametresRoutes from './routes/parametres.routes'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -51,6 +52,7 @@ app.use('/dashboard', dashboardRoutes)
 app.use('/agences', agenceRoutes)
 app.use('/fruits', fruitRoutes)
 app.use('/retours', retourRoutes)
+app.use('/parametres', parametresRoutes)
 app.get('/health', (req, res) => res.json({ status: "ok", timestamp: new Date() }))
 
 // Route de santé
