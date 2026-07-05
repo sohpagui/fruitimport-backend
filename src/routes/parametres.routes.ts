@@ -9,6 +9,7 @@ import { Role } from '@prisma/client'
 const router = Router()
 
 // GET /parametres — Recuperer tous les parametres
+// Route publique - pas besoin de token
 router.get('/', async (req, res) => {
   try {
     const params = await prisma.parametreSysteme.findMany()

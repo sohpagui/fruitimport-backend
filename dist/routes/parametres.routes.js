@@ -12,6 +12,7 @@ const response_1 = require("../utils/response");
 const client_1 = require("@prisma/client");
 const router = (0, express_1.Router)();
 // GET /parametres — Recuperer tous les parametres
+// Route publique - pas besoin de token
 router.get('/', async (req, res) => {
     try {
         const params = await prisma_1.default.parametreSysteme.findMany();

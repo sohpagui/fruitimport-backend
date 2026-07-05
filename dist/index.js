@@ -23,6 +23,7 @@ const agence_routes_1 = __importDefault(require("./routes/agence.routes"));
 const fruit_routes_1 = __importDefault(require("./routes/fruit.routes"));
 const retour_routes_1 = __importDefault(require("./routes/retour.routes"));
 const parametres_routes_1 = __importDefault(require("./routes/parametres.routes"));
+const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 // Créer les dossiers nécessaires
@@ -54,6 +55,7 @@ app.use('/agences', agence_routes_1.default);
 app.use('/fruits', fruit_routes_1.default);
 app.use('/retours', retour_routes_1.default);
 app.use('/parametres', parametres_routes_1.default);
+app.use('/chat', chat_routes_1.default);
 app.get('/health', (req, res) => res.json({ status: "ok", timestamp: new Date() }));
 // Route de santé
 app.get('/health', (req, res) => {
