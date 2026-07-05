@@ -50,7 +50,7 @@ async function genererRapportJournalier() {
                 const dateStr = aujourd_hui.toISOString().split('T')[0];
                 const result = await cloudinary_1.default.uploader.upload(dataURI, {
                     folder: 'fruitimport/rapports',
-                    public_id: `rapport_${dateStr}`,
+                    public_id: `rapport_${dateStr}.pdf`,
                     overwrite: true,
                     resource_type: 'raw'
                 });
