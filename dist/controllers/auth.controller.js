@@ -88,7 +88,19 @@ async function registerClient(req, res) {
 }
 // GET /auth/me — Infos de l'utilisateur connecté
 async function me(req, res) {
-    return (0, response_1.repondreSucces)(res, req.user);
+    try {
+        const userId = req.user.id;
+        const user = await prisma_1.default.user.findUnique({
+            where: { id: userId },
+            select: { id: true, nom: true, telephone: true, email: true, role: true, agenceId: true, actif: true, photoUrl: true, agence: { select: { id: true, nom: true, ville: true } } }
+        });
+        if (!user)
+            return (0, response_1.repondreErreur)(res, "Utilisateur introuvable.", 404);
+        return (0, response_1.repondreSucces)(res, { ...user, isClient: false });
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
 }
 // PATCH /auth/changer-mot-de-passe
 async function changerPassword(req, res) {
