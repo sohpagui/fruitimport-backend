@@ -48,12 +48,14 @@ router.get('/rapport', authentifier, autoriser(Role.PDG), async (req, res) => {
   } catch (e: any) { return repondreErreur(res, e.message, 500) }
 })
 
-// POST /parametres/rapport/generer — Generer le rapport maintenant
+// POST /parametres/rapport/generer — Generer et telecharger le rapport
 router.post('/rapport/generer', authentifier, autoriser(Role.PDG), async (req, res) => {
   try {
-    const { genererRapportJournalier } = await import('../services/rapport.service')
-    const url = await genererRapportJournalier()
-    return repondreSucces(res, { url }, 'Rapport genere avec succes.')
+    const { genererRapportJournalierBuffer } = await import('../services/rapport.service')
+    const { buffer, dateStr } = await genererRapportJournalierBuffer()
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader("Content-Disposition", "attachment; filename=rapport.pdf")
+    res.send(buffer)
   } catch (e: any) { return repondreErreur(res, e.message, 500) }
 })
 

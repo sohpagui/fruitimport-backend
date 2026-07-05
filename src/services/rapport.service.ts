@@ -149,3 +149,74 @@ export async function genererRapportJournalier(): Promise<string> {
     doc.end()
   })
 }
+
+export async function genererRapportJournalierBuffer(): Promise<{ buffer: Buffer, dateStr: string }> {
+  const aujourd_hui = new Date()
+  aujourd_hui.setHours(0, 0, 0, 0)
+  const demain = new Date(aujourd_hui)
+  demain.setDate(demain.getDate() + 1)
+  const dateStr = aujourd_hui.toISOString().split('T')[0]
+
+  const [agences, commandesJour, livraisonsJour, pertes, alertesStock, clientsRetard] = await Promise.all([
+    prisma.agence.findMany(),
+    prisma.commande.findMany({ where: { date: { gte: aujourd_hui, lt: demain } }, include: { client: true, agence: true } }),
+    prisma.livraison.findMany({ where: { dateAssignation: { gte: aujourd_hui, lt: demain } }, include: { commande: { include: { client: true } }, livreur: true } }),
+    prisma.perte.findMany({ where: { date: { gte: aujourd_hui, lt: demain } }, include: { fruit: true, agence: true } }),
+    prisma.stock.findMany({ where: { quantiteCartons: { lte: 5 } }, include: { fruit: true, agence: true, calibre: true } }),
+    prisma.client.findMany({ where: { statutCredit: 'EN_RETARD' }, include: { agence: true } })
+  ])
+
+  const totalVentes = commandesJour.reduce((sum, c) => sum + Number(c.montantTotal), 0)
+  const totalPertes = pertes.reduce((sum, p) => sum + Number(p.valeurPerdue), 0)
+
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50 })
+    const chunks: Buffer[] = []
+    doc.on('data', chunk => chunks.push(chunk))
+    doc.on('end', () => resolve({ buffer: Buffer.concat(chunks), dateStr }))
+    doc.on('error', reject)
+
+    doc.fontSize(20).font('Helvetica-Bold').text('EST. RENE - FRUITIMPORT CAMEROUN', { align: 'center' })
+    doc.fontSize(14).font('Helvetica').text(`RAPPORT JOURNALIER DU ${aujourd_hui.toLocaleDateString('fr-FR')}`, { align: 'center' })
+    doc.moveDown()
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke()
+    doc.moveDown()
+
+    doc.fontSize(14).font('Helvetica-Bold').text('RÉSUMÉ EXÉCUTIF')
+    doc.moveDown(0.5)
+    doc.fontSize(11).font('Helvetica')
+    doc.text(`Total des ventes : ${totalVentes.toLocaleString()} FCFA`)
+    doc.text(`Commandes : ${commandesJour.length}`)
+    doc.text(`Livraisons : ${livraisonsJour.length}`)
+    doc.text(`Pertes : ${totalPertes.toLocaleString()} FCFA`)
+    doc.text(`Clients en retard : ${clientsRetard.length}`)
+    doc.text(`Stocks bas : ${alertesStock.length}`)
+    doc.moveDown()
+
+    agences.forEach(agence => {
+      const cmds = commandesJour.filter(c => c.agenceId === agence.id)
+      const total = cmds.reduce((s, c) => s + Number(c.montantTotal), 0)
+      doc.fontSize(12).font('Helvetica-Bold').text(`${agence.nom} - ${cmds.length} commandes - ${total.toLocaleString()} FCFA`)
+      doc.fontSize(10).font('Helvetica')
+      cmds.forEach(cmd => doc.text(`  • ${cmd.numero} - ${cmd.client?.nom || ''} - ${Number(cmd.montantTotal).toLocaleString()} FCFA - ${cmd.statut}`))
+      if (cmds.length === 0) doc.text('  Aucune commande.')
+      doc.moveDown(0.5)
+    })
+
+    doc.addPage()
+    doc.fontSize(14).font('Helvetica-Bold').text('CLIENTS EN RETARD')
+    doc.moveDown(0.5)
+    doc.fontSize(10).font('Helvetica')
+    clientsRetard.forEach(c => doc.text(`• ${c.nom} - ${c.agence?.nom || ''} - ${Number(c.creditUtilise).toLocaleString()} FCFA`))
+    if (clientsRetard.length === 0) doc.text('Aucun client en retard.')
+    doc.moveDown()
+
+    doc.fontSize(14).font('Helvetica-Bold').text('STOCKS BAS')
+    doc.moveDown(0.5)
+    doc.fontSize(10).font('Helvetica')
+    alertesStock.forEach(s => doc.text(`• ${s.fruit?.nom || ''} - ${s.agence?.nom || ''} - ${s.quantiteCartons} cartons`))
+    if (alertesStock.length === 0) doc.text('Aucun stock bas.')
+
+    doc.end()
+  })
+}

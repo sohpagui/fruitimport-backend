@@ -91,12 +91,14 @@ router.get('/rapport', auth_middleware_1.authentifier, (0, auth_middleware_1.aut
         return (0, response_1.repondreErreur)(res, e.message, 500);
     }
 });
-// POST /parametres/rapport/generer — Generer le rapport maintenant
+// POST /parametres/rapport/generer — Generer et telecharger le rapport
 router.post('/rapport/generer', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG), async (req, res) => {
     try {
-        const { genererRapportJournalier } = await Promise.resolve().then(() => __importStar(require('../services/rapport.service')));
-        const url = await genererRapportJournalier();
-        return (0, response_1.repondreSucces)(res, { url }, 'Rapport genere avec succes.');
+        const { genererRapportJournalierBuffer } = await Promise.resolve().then(() => __importStar(require('../services/rapport.service')));
+        const { buffer, dateStr } = await genererRapportJournalierBuffer();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader("Content-Disposition", "attachment; filename=rapport.pdf");
+        res.send(buffer);
     }
     catch (e) {
         return (0, response_1.repondreErreur)(res, e.message, 500);
