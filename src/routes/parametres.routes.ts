@@ -39,4 +39,22 @@ router.post('/logo', authentifier, autoriser(Role.PDG), upload.single('logo'), a
   } catch (e: any) { return repondreErreur(res, e.message, 500) }
 })
 
+// GET /parametres/rapport — Telecharger le dernier rapport
+router.get('/rapport', authentifier, autoriser(Role.PDG), async (req, res) => {
+  try {
+    const param = await prisma.parametreSysteme.findUnique({ where: { cle: 'dernier_rapport_url' } })
+    const date = await prisma.parametreSysteme.findUnique({ where: { cle: 'dernier_rapport_date' } })
+    return repondreSucces(res, { url: param.valeur, date: date?.valeur })
+  } catch (e: any) { return repondreErreur(res, e.message, 500) }
+})
+
+// POST /parametres/rapport/generer — Generer le rapport maintenant
+router.post('/rapport/generer', authentifier, autoriser(Role.PDG), async (req, res) => {
+  try {
+    const { genererRapportJournalier } = await import('../services/rapport.service')
+    const url = await genererRapportJournalier()
+    return repondreSucces(res, { url }, 'Rapport genere avec succes.')
+  } catch (e: any) { return repondreErreur(res, e.message, 500) }
+})
+
 export default router

@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -42,6 +75,28 @@ router.post('/logo', auth_middleware_1.authentifier, (0, auth_middleware_1.autor
             create: { cle: 'logo_url', valeur: result.secure_url }
         });
         return (0, response_1.repondreSucces)(res, { logoUrl: result.secure_url }, 'Logo mis a jour.');
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
+});
+// GET /parametres/rapport — Telecharger le dernier rapport
+router.get('/rapport', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG), async (req, res) => {
+    try {
+        const param = await prisma_1.default.parametreSysteme.findUnique({ where: { cle: 'dernier_rapport_url' } });
+        const date = await prisma_1.default.parametreSysteme.findUnique({ where: { cle: 'dernier_rapport_date' } });
+        return (0, response_1.repondreSucces)(res, { url: param.valeur, date: date?.valeur });
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
+});
+// POST /parametres/rapport/generer — Generer le rapport maintenant
+router.post('/rapport/generer', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG), async (req, res) => {
+    try {
+        const { genererRapportJournalier } = await Promise.resolve().then(() => __importStar(require('../services/rapport.service')));
+        const url = await genererRapportJournalier();
+        return (0, response_1.repondreSucces)(res, { url }, 'Rapport genere avec succes.');
     }
     catch (e) {
         return (0, response_1.repondreErreur)(res, e.message, 500);

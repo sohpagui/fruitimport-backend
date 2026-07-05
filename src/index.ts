@@ -19,6 +19,7 @@ import agenceRoutes from './routes/agence.routes'
 import fruitRoutes from './routes/fruit.routes'
 import retourRoutes from './routes/retour.routes'
 import parametresRoutes from './routes/parametres.routes'
+import { demarrerCron } from './services/cron.service'
 import chatRoutes from './routes/chat.routes'
 
 const app = express()
@@ -54,6 +55,7 @@ app.use('/agences', agenceRoutes)
 app.use('/fruits', fruitRoutes)
 app.use('/retours', retourRoutes)
 app.use('/parametres', parametresRoutes)
+demarrerCron()
 app.use('/chat', chatRoutes)
 app.get('/health', (req, res) => res.json({ status: "ok", timestamp: new Date() }))
 
