@@ -217,6 +217,8 @@ model Calibre {
   id              Int    @id @default(autoincrement())
   fruitId         Int    @map("fruit_id")
   valeur          String @db.VarChar(50)   // ex: "100", "8.5kg", "cal.3"
+  prixAchat       Float? @map("prix_achat")
+  prixVente       Float? @map("prix_vente")
   ordreAffichage  Int    @default(0) @map("ordre_affichage")
 
   // Relations
