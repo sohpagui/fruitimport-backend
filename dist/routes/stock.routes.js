@@ -11,8 +11,8 @@ router.get('/catalogue', auth_middleware_1.authentifier, stock_controller_1.cata
 router.get('/', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG, client_1.Role.SECRETAIRE, client_1.Role.MAGASINIER), stock_controller_1.listerStocks);
 router.get('/alertes', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG, client_1.Role.SECRETAIRE, client_1.Role.MAGASINIER), stock_controller_1.alertesStock);
 // Réception (magasinier uniquement)
-router.post('/reception', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.MAGASINIER), stock_controller_1.receptionMarchandise);
+router.post('/reception', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.MAGASINIER, client_1.Role.SECRETAIRE), stock_controller_1.receptionMarchandise);
 // Pertes (magasinier uniquement)
-router.post('/pertes', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.MAGASINIER), stock_controller_1.perteStock);
+router.post('/pertes', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.MAGASINIER, client_1.Role.SECRETAIRE), stock_controller_1.perteStock);
 exports.default = router;
 //# sourceMappingURL=stock.routes.js.map

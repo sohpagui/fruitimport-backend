@@ -13,9 +13,9 @@ router.get('/', authentifier, autoriser(Role.PDG, Role.SECRETAIRE, Role.MAGASINI
 router.get('/alertes', authentifier, autoriser(Role.PDG, Role.SECRETAIRE, Role.MAGASINIER), alertesStock)
 
 // Réception (magasinier uniquement)
-router.post('/reception', authentifier, autoriser(Role.MAGASINIER), receptionMarchandise)
+router.post('/reception', authentifier, autoriser(Role.MAGASINIER, Role.SECRETAIRE), receptionMarchandise)
 
 // Pertes (magasinier uniquement)
-router.post('/pertes', authentifier, autoriser(Role.MAGASINIER), perteStock)
+router.post('/pertes', authentifier, autoriser(Role.MAGASINIER, Role.SECRETAIRE), perteStock)
 
 export default router
