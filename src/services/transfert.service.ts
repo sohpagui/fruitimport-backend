@@ -3,8 +3,8 @@ import { creerTransfert, listerTransferts, approuverTransfert, rejeterTransfert 
 import { PaginationParams } from '../types'
 
 export async function demanderTransfert(data: any, demandeur: { id: number; agenceId: number | null; role: string }) {
-  if (demandeur.role !== Role.MAGASINIER) {
-    throw new Error('Seul un magasinier peut initier un transfert.')
+  if (demandeur.role !== Role.MAGASINIER && demandeur.role !== Role.SECRETAIRE) {
+    throw new Error('Seul un magasinier ou secretaire peut initier un transfert.')
   }
   return creerTransfert({ ...data, demandePar: demandeur.id, agenceSourceId: demandeur.agenceId })
 }

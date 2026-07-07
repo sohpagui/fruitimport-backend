@@ -7,8 +7,8 @@ exports.rejeter = rejeter;
 const client_1 = require("@prisma/client");
 const transfert_repository_1 = require("../repositories/transfert.repository");
 async function demanderTransfert(data, demandeur) {
-    if (demandeur.role !== client_1.Role.MAGASINIER) {
-        throw new Error('Seul un magasinier peut initier un transfert.');
+    if (demandeur.role !== client_1.Role.MAGASINIER && demandeur.role !== client_1.Role.SECRETAIRE) {
+        throw new Error('Seul un magasinier ou secretaire peut initier un transfert.');
     }
     return (0, transfert_repository_1.creerTransfert)({ ...data, demandePar: demandeur.id, agenceSourceId: demandeur.agenceId });
 }
