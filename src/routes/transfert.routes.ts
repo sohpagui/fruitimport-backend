@@ -5,7 +5,7 @@ import { Role } from '@prisma/client'
 
 const router = Router()
 
-router.post('/', authentifier, autoriser(Role.MAGASINIER), creerTransfert)
+router.post('/', authentifier, autoriser(Role.MAGASINIER, Role.SECRETAIRE), creerTransfert)
 router.get('/', authentifier, autoriser(Role.PDG, Role.MAGASINIER, Role.SECRETAIRE), listerTransferts)
 router.patch('/:id/approuver', authentifier, autoriser(Role.PDG), approuverTransfert)
 router.patch('/:id/rejeter', authentifier, autoriser(Role.PDG), rejeterTransfert)
