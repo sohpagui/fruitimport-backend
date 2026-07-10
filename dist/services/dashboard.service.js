@@ -8,6 +8,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.obtenirDashboardPDG = obtenirDashboardPDG;
 exports.obtenirDashboardAgence = obtenirDashboardAgence;
+exports.obtenirBenefices = obtenirBenefices;
 const dashboard_repository_1 = require("../repositories/dashboard.repository");
 // ── Dashboard PDG : vue globale des deux agences
 async function obtenirDashboardPDG() {
@@ -44,5 +45,10 @@ async function obtenirDashboardPDG() {
 // ── Dashboard par agence (secrétaire, magasinier)
 async function obtenirDashboardAgence(agenceId) {
     return (0, dashboard_repository_1.statsParAgence)(agenceId);
+}
+// ── Bénéfices réels pour le PDG
+async function obtenirBenefices(periode) {
+    const p = (periode === 'semaine' || periode === 'mois') ? periode : 'jour';
+    return (0, dashboard_repository_1.beneficesReels)(p);
 }
 //# sourceMappingURL=dashboard.service.js.map

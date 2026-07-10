@@ -59,4 +59,18 @@ export declare function statsParAgence(agenceId: number): Promise<{
     }[];
 }>;
 export declare function genererSynthese(agenceId1: number, agenceId2: number): Promise<string[]>;
+export declare function beneficesReels(periode: 'jour' | 'semaine' | 'mois'): Promise<{
+    periode: "jour" | "semaine" | "mois";
+    chiffreAffaires: number;
+    coutAchat: number;
+    beneficeBrut: number;
+    valeurPertes: number;
+    beneficeNet: number;
+    margePercent: string;
+    parFruit: {
+        nom: string;
+        benefice: number;
+        quantite: number;
+    }[];
+}>;
 //# sourceMappingURL=dashboard.repository.d.ts.map

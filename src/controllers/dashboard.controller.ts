@@ -4,7 +4,7 @@
 // ============================================================
 
 import { Request, Response } from 'express'
-import { obtenirDashboardPDG, obtenirDashboardAgence } from '../services/dashboard.service'
+import { obtenirDashboardPDG, obtenirDashboardAgence, obtenirBenefices } from '../services/dashboard.service'
 import { repondreSucces, repondreErreur } from '../utils/response'
 import { Role } from '@prisma/client'
 
@@ -29,6 +29,16 @@ export async function dashboardAgence(req: Request, res: Response) {
     }
 
     const data = await obtenirDashboardAgence(agenceId)
+    return repondreSucces(res, data)
+  } catch (e: any) {
+    return repondreErreur(res, e.message, 500)
+  }
+}
+
+export async function beneficesPDG(req: Request, res: Response) {
+  try {
+    const periode = (req.query.periode as string) || 'jour'
+    const data = await obtenirBenefices(periode)
     return repondreSucces(res, data)
   } catch (e: any) {
     return repondreErreur(res, e.message, 500)

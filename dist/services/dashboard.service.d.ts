@@ -89,4 +89,18 @@ export declare function obtenirDashboardAgence(agenceId: number): Promise<{
         quantite: number;
     }[];
 }>;
+export declare function obtenirBenefices(periode: string): Promise<{
+    periode: "jour" | "semaine" | "mois";
+    chiffreAffaires: number;
+    coutAchat: number;
+    beneficeBrut: number;
+    valeurPertes: number;
+    beneficeNet: number;
+    margePercent: string;
+    parFruit: {
+        nom: string;
+        benefice: number;
+        quantite: number;
+    }[];
+}>;
 //# sourceMappingURL=dashboard.service.d.ts.map

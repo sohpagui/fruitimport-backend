@@ -14,6 +14,7 @@ exports.ventesSetDernierJours = ventesSetDernierJours;
 exports.ventesParFruit = ventesParFruit;
 exports.statsParAgence = statsParAgence;
 exports.genererSynthese = genererSynthese;
+exports.beneficesReels = beneficesReels;
 const prisma_1 = __importDefault(require("../lib/prisma"));
 // ── Stats globales du jour pour les deux agences
 async function statsGlobales() {
@@ -242,5 +243,66 @@ async function genererSynthese(agenceId1, agenceId2) {
         phrases.push(`${stats1.topFruits[0].fruit.nom} est le fruit le plus vendu à Douala cette période.`);
     }
     return phrases;
+}
+// ── Bénéfices réels (prix vente - prix achat) par période
+async function beneficesReels(periode) {
+    const aujourd_hui = new Date();
+    aujourd_hui.setHours(0, 0, 0, 0);
+    const debut = new Date(aujourd_hui);
+    if (periode === 'semaine')
+        debut.setDate(debut.getDate() - 7);
+    else if (periode === 'mois')
+        debut.setDate(1);
+    // Récupérer toutes les lignes de commandes validées avec prix achat et vente
+    const lignes = await prisma_1.default.ligneCommande.findMany({
+        where: {
+            commande: {
+                date: { gte: debut },
+                statut: { in: ['CONFIRMEE', 'PREPAREE', 'EN_LIVRAISON', 'LIVREE'] },
+            },
+        },
+        include: {
+            calibre: { select: { prixAchat: true, prixVente: true } },
+            fruit: { select: { id: true, nom: true } },
+            commande: { select: { agenceId: true, date: true } },
+        },
+    });
+    // Calculer bénéfice par ligne
+    let beneficeBrut = 0;
+    let coutAchat = 0;
+    let chiffreAffaires = 0;
+    const parFruit = {};
+    for (const ligne of lignes) {
+        const prixVente = Number(ligne.prixUnitaire);
+        const prixAchat = Number(ligne.calibre?.prixAchat || 0);
+        const qte = ligne.quantite;
+        const ca = prixVente * qte;
+        const cout = prixAchat * qte;
+        const benefice = ca - cout;
+        chiffreAffaires += ca;
+        coutAchat += cout;
+        beneficeBrut += benefice;
+        const fruitId = ligne.fruitId.toString();
+        if (!parFruit[fruitId])
+            parFruit[fruitId] = { nom: ligne.fruit?.nom || '', benefice: 0, quantite: 0 };
+        parFruit[fruitId].benefice += benefice;
+        parFruit[fruitId].quantite += qte;
+    }
+    // Pertes de la même période
+    const pertes = await prisma_1.default.perte.aggregate({
+        where: { date: { gte: debut } },
+        _sum: { valeurPerdue: true, quantite: true },
+    });
+    const valeurPertes = Number(pertes._sum.valeurPerdue) || 0;
+    return {
+        periode,
+        chiffreAffaires,
+        coutAchat,
+        beneficeBrut,
+        valeurPertes,
+        beneficeNet: beneficeBrut - valeurPertes,
+        margePercent: chiffreAffaires > 0 ? ((beneficeBrut / chiffreAffaires) * 100).toFixed(1) : '0',
+        parFruit: Object.values(parFruit).sort((a, b) => b.benefice - a.benefice).slice(0, 5),
+    };
 }
 //# sourceMappingURL=dashboard.repository.js.map

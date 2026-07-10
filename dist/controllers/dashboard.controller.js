@@ -6,6 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dashboardPDG = dashboardPDG;
 exports.dashboardAgence = dashboardAgence;
+exports.beneficesPDG = beneficesPDG;
 const dashboard_service_1 = require("../services/dashboard.service");
 const response_1 = require("../utils/response");
 const client_1 = require("@prisma/client");
@@ -28,6 +29,16 @@ async function dashboardAgence(req, res) {
             return (0, response_1.repondreErreur)(res, 'Acces refuse a cette agence.', 403);
         }
         const data = await (0, dashboard_service_1.obtenirDashboardAgence)(agenceId);
+        return (0, response_1.repondreSucces)(res, data);
+    }
+    catch (e) {
+        return (0, response_1.repondreErreur)(res, e.message, 500);
+    }
+}
+async function beneficesPDG(req, res) {
+    try {
+        const periode = req.query.periode || 'jour';
+        const data = await (0, dashboard_service_1.obtenirBenefices)(periode);
         return (0, response_1.repondreSucces)(res, data);
     }
     catch (e) {

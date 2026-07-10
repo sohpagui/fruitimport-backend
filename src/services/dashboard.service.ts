@@ -11,6 +11,7 @@ import {
   ventesParFruit,
   statsParAgence,
   genererSynthese,
+  beneficesReels,
 } from '../repositories/dashboard.repository'
 
 // ── Dashboard PDG : vue globale des deux agences
@@ -53,4 +54,10 @@ export async function obtenirDashboardPDG() {
 // ── Dashboard par agence (secrétaire, magasinier)
 export async function obtenirDashboardAgence(agenceId: number) {
   return statsParAgence(agenceId)
+}
+
+// ── Bénéfices réels pour le PDG
+export async function obtenirBenefices(periode: string) {
+  const p = (periode === 'semaine' || periode === 'mois') ? periode : 'jour'
+  return beneficesReels(p as 'jour' | 'semaine' | 'mois')
 }

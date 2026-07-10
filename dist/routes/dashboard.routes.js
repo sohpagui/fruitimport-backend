@@ -13,5 +13,6 @@ const router = (0, express_1.Router)();
 router.get('/pdg', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG), dashboard_controller_1.dashboardPDG);
 // Dashboard agence (PDG + employés de l'agence)
 router.get('/agence/:id', auth_middleware_1.authentifier, dashboard_controller_1.dashboardAgence);
+router.get('/benefices', auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG), dashboard_controller_1.beneficesPDG);
 exports.default = router;
 //# sourceMappingURL=dashboard.routes.js.map
