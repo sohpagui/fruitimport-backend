@@ -21,6 +21,7 @@ import retourRoutes from './routes/retour.routes'
 import parametresRoutes from './routes/parametres.routes'
 import { demarrerCron } from './services/cron.service'
 import chatRoutes from './routes/chat.routes'
+import comptoirRoutes from './routes/comptoir.routes'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -57,6 +58,7 @@ app.use('/retours', retourRoutes)
 app.use('/parametres', parametresRoutes)
 demarrerCron()
 app.use('/chat', chatRoutes)
+app.use('/comptoir', comptoirRoutes)
 app.get('/health', (req, res) => res.json({ status: "ok", timestamp: new Date() }))
 
 // Route de santé

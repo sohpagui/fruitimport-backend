@@ -135,6 +135,7 @@ model Agence {
   transfertsSource Transfert[]         @relation("TransfertSource")
   transfertsDest  Transfert[]          @relation("TransfertDestination")
   clients         Client[]             // clients rattachés à cette agence
+  comptoirs         Comptoir[]
 
   @@map("agences")
 }
@@ -177,6 +178,10 @@ model User {
   conversations         ConversationParticipant[]
   messagesEnvoyes       Message[]              @relation("MessageSender")
   notifications     Notification[]
+  gerantComptoir             Comptoir[]                    @relation("GerantComptoir")
+  approvisionnementsComptoir2 ApprovisionnementComptoir[]   @relation("ApprovisionneurComptoir")
+  versementsComptoir          VersementComptoir[]           @relation("VerseurComptoir")
+  pertesComptoir2             PerteComptoir[]               @relation("GerantPerteComptoir")
   logsActions       LogAction[]
   historiqueConnexions HistoriqueConnexion[]
 
@@ -203,6 +208,9 @@ model Fruit {
   receptions ReceptionMarchandise[]
   pertes     Perte[]
   lignesCommande LigneCommande[]
+  stockComptoir        StockComptoir[]
+  approvisionnementsComptoir ApprovisionnementComptoir[]
+  pertesComptoir       PerteComptoir[]
   transferts Transfert[]
 
   @@map("fruits")
@@ -227,6 +235,9 @@ model Calibre {
   receptions     ReceptionMarchandise[]
   pertes         Perte[]
   lignesCommande LigneCommande[]
+  stockComptoir        StockComptoir[]
+  approvisionnementsComptoir ApprovisionnementComptoir[]
+  pertesComptoir       PerteComptoir[]
   retours        RetourMarchandise[]
   transferts     Transfert[]
 
@@ -663,4 +674,92 @@ model Message {
   @@index([conversationId])
   @@index([senderId])
   @@map("messages")
+}
+
+// ============================================================
+// TABLE : comptoir
+// ============================================================
+model Comptoir {
+  id              Int      @id @default(autoincrement())
+  agenceId        Int      @map("agence_id")
+  gerantActuelId  Int?     @map("gerant_actuel_id")
+  actif           Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  agence          Agence   @relation(fields: [agenceId], references: [id])
+  gerantActuel    User?    @relation("GerantComptoir", fields: [gerantActuelId], references: [id])
+  stockComptoir        StockComptoir[]
+  approvisionnements   ApprovisionnementComptoir[]
+  versements           VersementComptoir[]
+  pertesComptoir       PerteComptoir[]
+  @@map("comptoirs")
+}
+
+// ============================================================
+// TABLE : stock_comptoir
+// ============================================================
+model StockComptoir {
+  id          Int      @id @default(autoincrement())
+  comptoirId  Int      @map("comptoir_id")
+  fruitId     Int      @map("fruit_id")
+  calibreId   Int      @map("calibre_id")
+  quantite    Int      @default(0)
+  prixDetail  Decimal  @map("prix_detail") @db.Decimal(10, 2)
+  updatedAt   DateTime @updatedAt
+  comptoir    Comptoir @relation(fields: [comptoirId], references: [id])
+  fruit       Fruit    @relation(fields: [fruitId], references: [id])
+  calibre     Calibre  @relation(fields: [calibreId], references: [id])
+  @@unique([comptoirId, fruitId, calibreId])
+  @@map("stock_comptoir")
+}
+
+// ============================================================
+// TABLE : approvisionnements_comptoir
+// ============================================================
+model ApprovisionnementComptoir {
+  id          Int      @id @default(autoincrement())
+  comptoirId  Int      @map("comptoir_id")
+  fruitId     Int      @map("fruit_id")
+  calibreId   Int      @map("calibre_id")
+  quantite    Int
+  gerantId    Int      @map("gerant_id")
+  date        DateTime @default(now())
+  comptoir    Comptoir @relation(fields: [comptoirId], references: [id])
+  fruit       Fruit    @relation(fields: [fruitId], references: [id])
+  calibre     Calibre  @relation(fields: [calibreId], references: [id])
+  gerant      User     @relation("ApprovisionneurComptoir", fields: [gerantId], references: [id])
+  @@map("approvisionnements_comptoir")
+}
+
+// ============================================================
+// TABLE : versements_comptoir
+// ============================================================
+model VersementComptoir {
+  id          Int      @id @default(autoincrement())
+  comptoirId  Int      @map("comptoir_id")
+  montant     Decimal  @db.Decimal(10, 2)
+  gerantId    Int      @map("gerant_id")
+  date        DateTime @default(now())
+  note        String?  @db.Text
+  comptoir    Comptoir @relation(fields: [comptoirId], references: [id])
+  gerant      User     @relation("VerseurComptoir", fields: [gerantId], references: [id])
+  @@map("versements_comptoir")
+}
+
+// ============================================================
+// TABLE : pertes_comptoir
+// ============================================================
+model PerteComptoir {
+  id          Int      @id @default(autoincrement())
+  comptoirId  Int      @map("comptoir_id")
+  fruitId     Int      @map("fruit_id")
+  calibreId   Int      @map("calibre_id")
+  quantite    Int
+  raison      String   @db.VarChar(100)
+  gerantId    Int      @map("gerant_id")
+  date        DateTime @default(now())
+  comptoir    Comptoir @relation(fields: [comptoirId], references: [id])
+  fruit       Fruit    @relation(fields: [fruitId], references: [id])
+  calibre     Calibre  @relation(fields: [calibreId], references: [id])
+  gerant      User     @relation("GerantPerteComptoir", fields: [gerantId], references: [id])
+  @@map("pertes_comptoir")
 }

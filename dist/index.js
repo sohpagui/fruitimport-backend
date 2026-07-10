@@ -25,6 +25,7 @@ const retour_routes_1 = __importDefault(require("./routes/retour.routes"));
 const parametres_routes_1 = __importDefault(require("./routes/parametres.routes"));
 const cron_service_1 = require("./services/cron.service");
 const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
+const comptoir_routes_1 = __importDefault(require("./routes/comptoir.routes"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 // Créer les dossiers nécessaires
@@ -58,6 +59,7 @@ app.use('/retours', retour_routes_1.default);
 app.use('/parametres', parametres_routes_1.default);
 (0, cron_service_1.demarrerCron)();
 app.use('/chat', chat_routes_1.default);
+app.use('/comptoir', comptoir_routes_1.default);
 app.get('/health', (req, res) => res.json({ status: "ok", timestamp: new Date() }));
 // Route de santé
 app.get('/health', (req, res) => {
