@@ -14,7 +14,7 @@ const router = (0, express_1.Router)();
 // Route accessible a la secretaire pour voir les livreurs
 router.get("/livreurs", auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG, client_1.Role.SECRETAIRE), user_controller_1.listerUsers);
 // Toutes les autres routes nécessitent d'être PDG
-router.use(auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG));
+router.use(auth_middleware_1.authentifier, (0, auth_middleware_1.autoriser)(client_1.Role.PDG, client_1.Role.SECRETAIRE));
 router.post('/', user_controller_1.creerUser); // POST   /admin/users
 router.get('/', user_controller_1.listerUsers); // GET    /admin/users
 router.get('/:id', user_controller_1.obtenirUser); // GET    /admin/users/:id

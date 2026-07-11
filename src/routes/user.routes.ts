@@ -16,7 +16,7 @@ const router = Router()
 router.get("/livreurs", authentifier, autoriser(Role.PDG, Role.SECRETAIRE), listerUsers)
 
 // Toutes les autres routes nécessitent d'être PDG
-router.use(authentifier, autoriser(Role.PDG))
+router.use(authentifier, autoriser(Role.PDG, Role.SECRETAIRE))
 
 router.post('/', creerUser)        // POST   /admin/users
 router.get('/', listerUsers)       // GET    /admin/users
